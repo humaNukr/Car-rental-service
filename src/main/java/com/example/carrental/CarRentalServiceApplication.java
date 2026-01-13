@@ -1,4 +1,4 @@
-package com.example.car_rental_service;
+package com.example.carrental;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
