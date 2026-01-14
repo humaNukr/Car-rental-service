@@ -1,6 +1,6 @@
 package com.example.carrental.enums;
 
-public enum Type {
+public enum CarType {
     SEDAN,
     SUV,
     WAGON,

@@ -1,6 +1,6 @@
 package com.example.carrental.enums;
 
-public enum Status {
+public enum CarStatus {
     AVAILABLE,
     RENTED,
     UNAVAILABLE

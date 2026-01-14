@@ -1,6 +1,6 @@
 package com.example.carrental.entity;
 
-import com.example.carrental.enums.Role;
+import com.example.carrental.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -39,7 +39,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role;
+    private UserRole role;
 
     @Column(nullable = false)
     private boolean isDeleted;

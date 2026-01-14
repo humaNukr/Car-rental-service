@@ -1,7 +1,7 @@
 package com.example.carrental.entity;
 
-import com.example.carrental.enums.Status;
-import com.example.carrental.enums.Type;
+import com.example.carrental.enums.CarStatus;
+import com.example.carrental.enums.CarType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,7 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -37,7 +36,7 @@ public class Car {
 
     @Enumerated()
     @Column(nullable = false)
-    private Type type;
+    private CarType type;
 
     @Column(nullable = false, unique = true)
     private String licensePlate;
@@ -53,8 +52,7 @@ public class Car {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status = Status.AVAILABLE;
-
+    private CarStatus status = CarStatus.AVAILABLE;
 
 
 }

@@ -1,6 +1,6 @@
 package com.example.carrental.enums;
 
-public enum Role {
+public enum UserRole {
     CUSTOMER,
     MANAGER,
     ADMIN
