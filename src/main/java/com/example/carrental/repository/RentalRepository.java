@@ -1,0 +1,17 @@
+package com.example.carrental.repository;
+
+import com.example.carrental.entity.Rental;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface RentalRepository extends JpaRepository<Rental, Long> {
+
+    @EntityGraph(attributePaths = {"car", "user"})
+    List<Rental> findAllByUserId(Long userId);
+
+    @EntityGraph(attributePaths = {"car", "user"})
+    List<Rental> findAllByActualReturnDateIsNull();
+
+}
