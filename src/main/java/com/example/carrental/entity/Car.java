@@ -34,7 +34,7 @@ public class Car {
     @Column(nullable = false)
     private String model;
 
-    @Enumerated()
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CarType type;
 
