@@ -31,11 +31,14 @@ dependencies {
     implementation("org.liquibase:liquibase-core")
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    compileOnly("org.projectlombok:lombok")
+
+    compileOnly("org.projectlombok:lombok:1.18.32")
     runtimeOnly("org.postgresql:postgresql")
-    annotationProcessor ("org.projectlombok:lombok-mapstruct-binding")
-    annotationProcessor ("org.projectlombok:lombok")
-    annotationProcessor ("org.mapstruct:mapstruct-processor")
+
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
