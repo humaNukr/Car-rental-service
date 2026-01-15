@@ -9,11 +9,13 @@ import com.example.carrental.repository.UserRepository;
 import com.example.carrental.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
@@ -23,6 +25,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto register(UserRegistrationRequestDto request) {
+        log.info("Attempting to register user with email: {}", request.getEmail());
 
         if (repository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("User with this email already exists");
@@ -34,6 +37,11 @@ public class UserServiceImpl implements UserService {
         user.setRole(UserRole.CUSTOMER);
 
         User savedUser = repository.save(user);
+
+        log.info(
+                "Successfully registered user with email: {}" + " and id: {}",
+                savedUser.getEmail(), savedUser.getId()
+        );
 
         return mapper.toDto(savedUser);
     }
