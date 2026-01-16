@@ -1,5 +1,3 @@
-import org.gradle.api.plugins.quality.Checkstyle
-
 plugins {
     java
     id("org.springframework.boot") version "3.5.9"
@@ -36,12 +34,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
 
     compileOnly("org.projectlombok:lombok:1.18.32")
-    annotationProcessor("org.projectlombok:lombok:1.18.32")
-
-    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
-    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
-
     runtimeOnly("org.postgresql:postgresql")
+
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
@@ -63,5 +60,3 @@ tasks.withType<Test> {
 tasks.withType<Checkstyle>().configureEach {
     enableExternalDtdLoad.set(true)
 }
-
-
