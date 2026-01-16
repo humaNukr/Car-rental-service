@@ -1,7 +1,10 @@
+import org.gradle.api.plugins.quality.Checkstyle
+
 plugins {
     java
     id("org.springframework.boot") version "3.5.9"
     id("io.spring.dependency-management") version "1.1.7"
+    id("checkstyle")
 }
 
 group = "com.example"
@@ -31,11 +34,15 @@ dependencies {
     implementation("org.liquibase:liquibase-core")
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    compileOnly("org.projectlombok:lombok")
+
+    compileOnly("org.projectlombok:lombok:1.18.32")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
+
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+
     runtimeOnly("org.postgresql:postgresql")
-    annotationProcessor ("org.projectlombok:lombok-mapstruct-binding")
-    annotationProcessor ("org.projectlombok:lombok")
-    annotationProcessor ("org.mapstruct:mapstruct-processor")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
@@ -44,6 +51,17 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+checkstyle {
+    toolVersion = "10.12.5"
+    configFile = file("config/checkstyle/checkstyle.xml")
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.withType<Checkstyle>().configureEach {
+    enableExternalDtdLoad.set(true)
+}
+
+
