@@ -59,4 +59,14 @@ tasks.withType<Test> {
 
 tasks.withType<Checkstyle>().configureEach {
     enableExternalDtdLoad.set(true)
+    if (project.hasProperty("checkstyle.includes")) {
+        val includes: List<String> = (project.findProperty("checkstyle.includes") as String).split(" ")
+        source = fileTree("src/main/java") {
+            include(includes)
+        }
+    } else {
+        source = fileTree("src/main/java") {
+            include("**/*.java")
+        }
+    }
 }
