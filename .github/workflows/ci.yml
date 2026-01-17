@@ -47,7 +47,7 @@ jobs:
 
       - name: Run Checkstyle on changed files
         if: env.CHANGED_FILES != ''
-        run: ./gradlew checkstyleMain -Pcheckstyle.includes="${{ env.CHANGED_FILES }}"
+        run: ./gradlew checkstyleMain checkstyleTest --project-prop checkstyle.includes="${{ env.CHANGED_FILES }}"
 
       - name: Build and Test with Gradle
         run: ./gradlew build --scan --parallel
