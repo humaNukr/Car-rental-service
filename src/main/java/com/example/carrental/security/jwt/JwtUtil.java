@@ -1,4 +1,4 @@
-package com.example.carrental.security.util;
+package com.example.carrental.security.jwt;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
