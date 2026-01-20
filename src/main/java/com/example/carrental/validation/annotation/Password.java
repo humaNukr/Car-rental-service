@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Password {
     String message() default "Password must be at least 8 characters long, contain at least one digit, "
-            + "one lowercase letter, one uppercase letter, one special character (@#$%^&+=), "
+            + "one lowercase letter, one uppercase letter, one special character (@#$%^&+=!), "
             + "and must not contain spaces.";
 
     Class<?>[] groups() default {};
