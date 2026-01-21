@@ -10,7 +10,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import java.util.TimeZone;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public abstract class BaseIT {
+public abstract class BaseIntegrationTest {
 
     static {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));

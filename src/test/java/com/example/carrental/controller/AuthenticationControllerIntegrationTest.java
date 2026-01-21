@@ -1,14 +1,16 @@
 package com.example.carrental.controller;
 
 import com.example.carrental.dto.jwt.JwtAuthenticationDto;
+import com.example.carrental.dto.jwt.RefreshTokenDto;
 import com.example.carrental.dto.user.UserLoginRequestDto;
 import com.example.carrental.dto.user.UserRegistrationRequestDto;
 import com.example.carrental.dto.user.UserResponseDto;
 import com.example.carrental.repository.UserRepository;
-import com.example.carrental.util.BaseIT;
+import com.example.carrental.util.BaseIntegrationTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -17,10 +19,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-public class AuthenticationControllerIntegrationTest extends BaseIT {
+public class AuthenticationControllerIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private TestRestTemplate testRestTemplate;
 
@@ -43,66 +47,135 @@ public class AuthenticationControllerIntegrationTest extends BaseIT {
         jdbcTemplate.execute("TRUNCATE TABLE users CASCADE");
     }
 
-    @Test
-    @DisplayName("Full Cycle: Register and Login successfully")
-    void registerAndLogin_Success(){
-        UserRegistrationRequestDto registerRequest = new UserRegistrationRequestDto();
-        registerRequest.setEmail("driver@test.com");
-        registerRequest.setPassword("SuperPass123!");
-        registerRequest.setConfirmPassword("SuperPass123!");
-        registerRequest.setFirstName("Max");
-        registerRequest.setLastName("Verstappen");
+    @Nested
+    @DisplayName("Registration & Login")
+    class RegistrationAndLoginTests {
 
-        ResponseEntity<UserResponseDto> responseDto = testRestTemplate.postForEntity(
-                String.format("http://localhost:%d/api/auth/register", port),
-                registerRequest,
-                UserResponseDto.class);
+        @Test
+        @DisplayName("Full Cycle: Register and Login successfully")
+        void registerAndLoginSuccess() {
+            UserRegistrationRequestDto registerRequest = new UserRegistrationRequestDto();
+            registerRequest.setEmail("driver@test.com");
+            registerRequest.setPassword("SuperPass123!");
+            registerRequest.setConfirmPassword("SuperPass123!");
+            registerRequest.setFirstName("Max");
+            registerRequest.setLastName("Verstappen");
 
-        assertEquals(HttpStatus.OK, responseDto.getStatusCode());
-        assertNotNull(responseDto.getBody());
-        assertEquals(registerRequest.getEmail(), responseDto.getBody().getEmail());
-        assertNotNull(responseDto.getBody().getId());
+            ResponseEntity<UserResponseDto> responseDto = testRestTemplate.postForEntity(
+                    String.format("http://localhost:%d/api/auth/register", port),
+                    registerRequest,
+                    UserResponseDto.class);
 
-        assertTrue(userRepository.findByEmail("driver@test.com").isPresent());
+            assertEquals(HttpStatus.OK, responseDto.getStatusCode());
+            assertNotNull(responseDto.getBody());
+            assertEquals(registerRequest.getEmail(), responseDto.getBody().getEmail());
+            assertNotNull(responseDto.getBody().getId());
 
-        UserLoginRequestDto loginRequest = new UserLoginRequestDto();
-        loginRequest.setEmail("driver@test.com");
-        loginRequest.setPassword("SuperPass123!");
+            assertTrue(userRepository.findByEmail("driver@test.com").isPresent());
 
-        ResponseEntity<JwtAuthenticationDto> authDto = testRestTemplate.postForEntity(
-                String.format("http://localhost:%d/api/auth/login", port),
-                loginRequest,
-                JwtAuthenticationDto.class);
-        assertEquals(HttpStatus.OK, authDto.getStatusCode());
-        assertNotNull(authDto.getBody());
-        assertNotNull(authDto.getBody().getToken());
-        assertNotNull(authDto.getBody().getRefreshToken());
+            UserLoginRequestDto loginRequest = new UserLoginRequestDto();
+            loginRequest.setEmail("driver@test.com");
+            loginRequest.setPassword("SuperPass123!");
+
+            ResponseEntity<JwtAuthenticationDto> authDto = testRestTemplate.postForEntity(
+                    String.format("http://localhost:%d/api/auth/login", port),
+                    loginRequest,
+                    JwtAuthenticationDto.class);
+            assertEquals(HttpStatus.OK, authDto.getStatusCode());
+            assertNotNull(authDto.getBody());
+            assertNotNull(authDto.getBody().getToken());
+            assertNotNull(authDto.getBody().getRefreshToken());
+        }
+
+        @Test
+        @DisplayName("Login should fail with wrong password")
+        void loginShouldFailWithWrongPassword() {
+            UserRegistrationRequestDto registerRequest = new UserRegistrationRequestDto();
+            registerRequest.setEmail("driver@test.com");
+            registerRequest.setPassword("SuperPass123!");
+            registerRequest.setConfirmPassword("SuperPass123!");
+            registerRequest.setFirstName("Max");
+            registerRequest.setLastName("Verstappen");
+
+            testRestTemplate.postForEntity(
+                    String.format("http://localhost:%d/api/auth/register", port),
+                    registerRequest,
+                    UserResponseDto.class);
+
+            UserLoginRequestDto wrongLogin = new UserLoginRequestDto();
+            wrongLogin.setEmail("driver@test.com");
+            wrongLogin.setPassword("WrongPass000!");
+
+            ResponseEntity<JwtAuthenticationDto> authDto = testRestTemplate.postForEntity(
+                    String.format("http://localhost:%d/api/auth/login", port),
+                    wrongLogin,
+                    JwtAuthenticationDto.class);
+
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, authDto.getStatusCode());
+        }
     }
 
-    @Test
-    @DisplayName("Login should fail with wrong password")
-    void loginShouldFailWithWrongPassword(){
-        UserRegistrationRequestDto registerRequest = new UserRegistrationRequestDto();
-        registerRequest.setEmail("driver@test.com");
-        registerRequest.setPassword("SuperPass123!");
-        registerRequest.setConfirmPassword("SuperPass123!");
-        registerRequest.setFirstName("Max");
-        registerRequest.setLastName("Verstappen");
+    @Nested
+    @DisplayName("Refresh Token")
+    class RefreshTokenTests {
 
-        testRestTemplate.postForEntity(
-                String.format("http://localhost:%d/api/auth/register", port),
-                registerRequest,
-                UserResponseDto.class);
+        @Test
+        @DisplayName("Should refresh token successfully")
+        void refreshTokenSuccess() {
+            UserRegistrationRequestDto registerRequest = new UserRegistrationRequestDto();
+            registerRequest.setEmail("refresh@test.com");
+            registerRequest.setPassword("Pass123!");
+            registerRequest.setConfirmPassword("Pass123!");
+            registerRequest.setFirstName("John");
+            registerRequest.setLastName("Doe");
 
-        UserLoginRequestDto wrongLogin = new UserLoginRequestDto();
-        wrongLogin.setEmail("driver@test.com");
-        wrongLogin.setPassword("WrongPass000!");
+            testRestTemplate.postForEntity(
+                    String.format("http://localhost:%d/api/auth/register", port),
+                    registerRequest,
+                    UserResponseDto.class);
 
-        ResponseEntity<JwtAuthenticationDto> authDto = testRestTemplate.postForEntity(
-                String.format("http://localhost:%d/api/auth/login", port),
-                wrongLogin,
-                JwtAuthenticationDto.class);
+            UserLoginRequestDto loginRequest = new UserLoginRequestDto();
+            loginRequest.setEmail("refresh@test.com");
+            loginRequest.setPassword("Pass123!");
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, authDto.getStatusCode());
+            ResponseEntity<JwtAuthenticationDto> loginResponse = testRestTemplate.postForEntity(
+                    String.format("http://localhost:%d/api/auth/login", port),
+                    loginRequest,
+                    JwtAuthenticationDto.class);
+
+            assertNotNull(loginResponse.getBody());
+            String oldRefreshToken = loginResponse.getBody().getRefreshToken();
+            assertNotNull(oldRefreshToken);
+
+            RefreshTokenDto refreshRequest = new RefreshTokenDto();
+            refreshRequest.setRefreshToken(oldRefreshToken);
+
+            ResponseEntity<JwtAuthenticationDto> refreshResponse = testRestTemplate.postForEntity(
+                    String.format("http://localhost:%d/api/auth/refresh", port),
+                    refreshRequest,
+                    JwtAuthenticationDto.class);
+
+            assertEquals(HttpStatus.OK, refreshResponse.getStatusCode());
+            assertNotNull(refreshResponse.getBody());
+
+            assertNotNull(refreshResponse.getBody().getToken());
+            assertNotNull(refreshResponse.getBody().getRefreshToken());
+
+            assertNotEquals(refreshResponse.getBody().getToken(), oldRefreshToken);
+        }
+
+        @Test
+        @DisplayName("Refresh should fail with bad token")
+        void refresh_Fail_BadToken() {
+            RefreshTokenDto badRequest = new RefreshTokenDto();
+            badRequest.setRefreshToken("some-fake-jwt-token-string");
+
+            ResponseEntity<Object> response = testRestTemplate.postForEntity(
+                    String.format("http://localhost:%d/api/auth/refresh", port),
+                    badRequest,
+                    Object.class);
+
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        }
     }
 }
