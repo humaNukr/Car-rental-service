@@ -3,11 +3,17 @@ package com.example.carrental.exception;
 import com.example.carrental.dto.exception.ErrorResponse;
 import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.exception.user.UserAlreadyExistsException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -45,6 +51,73 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getMessage()
         );
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Object> handleBadCredentials(BadCredentialsException ex) {
+        log.warn("Bad credentials: {}", ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex) {
+        log.warn("Access denied: {}", ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<Object> handleExpiredJwtException(ExpiredJwtException ex) {
+        log.warn("Expired JWT Exception: {}", ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity<Object> handleSignatureException(SignatureException ex) {
+        log.warn("Signature Exception: {}", ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    // 3. Для "битого" токена (наприклад, обрізаний рядок)
+    @ExceptionHandler(MalformedJwtException.class)
+    public ResponseEntity<Object> handleMalformedJwtException(MalformedJwtException ex) {
+        log.warn("Malformed JWT: {}", ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<Object> handleGeneralJwtException(JwtException ex) {
+        log.warn("JWT Exception: {}", ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     @Override

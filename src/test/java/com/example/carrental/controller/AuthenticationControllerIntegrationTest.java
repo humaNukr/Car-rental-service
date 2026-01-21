@@ -111,7 +111,7 @@ public class AuthenticationControllerIntegrationTest extends BaseIntegrationTest
                     wrongLogin,
                     JwtAuthenticationDto.class);
 
-            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, authDto.getStatusCode());
+            assertEquals(HttpStatus.UNAUTHORIZED, authDto.getStatusCode());
         }
     }
 
@@ -175,7 +175,7 @@ public class AuthenticationControllerIntegrationTest extends BaseIntegrationTest
                     badRequest,
                     Object.class);
 
-            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+            assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         }
     }
 }

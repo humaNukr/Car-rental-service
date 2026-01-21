@@ -51,16 +51,12 @@ public class JwtUtil {
     }
 
     public boolean validateJwtToken(String token) {
-        try {
-            Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token);
-            return true;
-        } catch (Exception e) {
-            log.error("Invalid JWT token: {}", e.getMessage());
-        }
-        return false;
+        Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token);
+
+        return true;
     }
 
     private Key getSigningKey() {
