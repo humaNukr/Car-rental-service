@@ -1,11 +1,13 @@
 package com.example.carrental.service.impl;
 
 import com.example.carrental.dto.jwt.JwtAuthenticationDto;
+import com.example.carrental.dto.jwt.RefreshTokenDto;
 import com.example.carrental.dto.user.UserLoginRequestDto;
 import com.example.carrental.dto.user.UserRegistrationRequestDto;
 import com.example.carrental.dto.user.UserResponseDto;
 import com.example.carrental.entity.User;
 import com.example.carrental.enums.UserRole;
+import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.exception.user.UserAlreadyExistsException;
 import com.example.carrental.mapper.user.UserMapper;
 import com.example.carrental.repository.UserRepository;
@@ -13,6 +15,7 @@ import com.example.carrental.security.jwt.JwtUtil;
 import com.example.carrental.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,5 +54,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String refreshToken = jwtUtil.generateRefreshToken(email);
 
         return new JwtAuthenticationDto(accessToken, refreshToken);
+    }
+
+    @Override
+    public JwtAuthenticationDto refreshToken(RefreshTokenDto request) {
+        String requestToken = request.getRefreshToken();
+        String email = jwtUtil.getEmailFromJwtToken(requestToken);
+
+        if (!jwtUtil.validateJwtToken(requestToken)) {
+            throw new BadCredentialsException("Refresh token is invalid or expired");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        String newAccessToken = jwtUtil.generateAccessToken(user.getEmail());
+        String newRefreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+
+        return new JwtAuthenticationDto(newAccessToken, newRefreshToken);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.carrental.controller;
 
 import com.example.carrental.dto.jwt.JwtAuthenticationDto;
+import com.example.carrental.dto.jwt.RefreshTokenDto;
 import com.example.carrental.dto.user.UserLoginRequestDto;
 import com.example.carrental.dto.user.UserRegistrationRequestDto;
 import com.example.carrental.dto.user.UserResponseDto;
@@ -26,5 +27,10 @@ public class AuthenticationController {
     @PostMapping("/login")
     public JwtAuthenticationDto login(@RequestBody @Valid UserLoginRequestDto request) {
         return authenticationService.login(request);
+    }
+
+    @PostMapping("/refresh")
+    public JwtAuthenticationDto refreshToken(@RequestBody @Valid RefreshTokenDto refreshTokenDto) {
+        return authenticationService.refreshToken(refreshTokenDto);
     }
 }
