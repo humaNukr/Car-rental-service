@@ -32,9 +32,13 @@ dependencies {
     implementation("org.liquibase:liquibase-core")
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.15")
 
     compileOnly("org.projectlombok:lombok:1.18.32")
     runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
     annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     annotationProcessor("org.projectlombok:lombok:1.18.32")
@@ -69,9 +73,11 @@ tasks.withType<Checkstyle>().configureEach {
             "checkstyleMain" -> fileTree("src/main/java") {
                 include("**/*.java")
             }
+
             "checkstyleTest" -> fileTree("src/test/java") {
                 include("**/*.java")
             }
+
             else -> fileTree("src") {
                 include("**/*.java")
             }

@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    Optional<Payment> findBySessionId(Long sessionId);
+    Optional<Payment> findBySessionId(String sessionId);
 
     @EntityGraph(attributePaths = {"rental"})
-    List<Payment> findAllByRentalUserId(Long sessionId);
+    List<Payment> findAllByRentalUserId(Long userId);
 
 }
