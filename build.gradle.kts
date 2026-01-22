@@ -33,6 +33,7 @@ dependencies {
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.15")
 
     compileOnly("org.projectlombok:lombok:1.18.32")
     runtimeOnly("org.postgresql:postgresql")
@@ -72,9 +73,11 @@ tasks.withType<Checkstyle>().configureEach {
             "checkstyleMain" -> fileTree("src/main/java") {
                 include("**/*.java")
             }
+
             "checkstyleTest" -> fileTree("src/test/java") {
                 include("**/*.java")
             }
+
             else -> fileTree("src") {
                 include("**/*.java")
             }
