@@ -59,6 +59,7 @@ checkstyle {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    maxParallelForks = 1
 }
 
 tasks.withType<Checkstyle>().configureEach {

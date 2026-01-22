@@ -21,14 +21,8 @@ public abstract class BaseIntegrationTest {
             .withUsername("test")
             .withPassword("test");
 
-    @BeforeAll
-    static void runContainer() {
+    static {
         POSTGRES.start();
-    }
-
-    @AfterAll
-    static void stopContainer() {
-        POSTGRES.stop();
     }
 
     @DynamicPropertySource
