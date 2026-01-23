@@ -2,6 +2,7 @@ package com.example.carrental.exception;
 
 import com.example.carrental.dto.exception.ErrorResponse;
 import com.example.carrental.exception.base.EntityNotFoundException;
+import com.example.carrental.exception.car.LicensePlateAlreadyExistsException;
 import com.example.carrental.exception.user.UserAlreadyExistsException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -30,6 +31,17 @@ import java.util.Map;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(LicensePlateAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleLicensePlateAlreadyExistsException(LicensePlateAlreadyExistsException ex) {
+        log.warn("License plate already exists: {}", ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException ex) {
