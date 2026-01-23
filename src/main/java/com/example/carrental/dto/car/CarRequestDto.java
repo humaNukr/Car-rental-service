@@ -2,6 +2,7 @@ package com.example.carrental.dto.car;
 
 import com.example.carrental.enums.CarType;
 import com.example.carrental.validation.annotation.UkrainianCarPlate;
+import com.example.carrental.validation.annotation.ValidEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -17,8 +18,8 @@ public class CarRequestDto {
     @NotBlank
     private String model;
 
-    @NotBlank
-    private CarType carType;
+    @ValidEnum(enumClass = CarType.class, message = "Car type must be one of: SUV, SEDAN, WAGON, HATCHBACK")
+    private CarType type;
 
     @NotBlank
     private String color;

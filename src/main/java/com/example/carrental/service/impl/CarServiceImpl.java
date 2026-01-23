@@ -2,14 +2,17 @@ package com.example.carrental.service.impl;
 
 import com.example.carrental.dto.car.CarRequestDto;
 import com.example.carrental.dto.car.CarResponseDto;
+import com.example.carrental.dto.car.CarSearchParameters;
 import com.example.carrental.entity.Car;
 import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.exception.car.LicensePlateAlreadyExistsException;
 import com.example.carrental.mapper.car.CarMapper;
 import com.example.carrental.repository.CarRepository;
+import com.example.carrental.repository.CarSpecificationBuilder;
 import com.example.carrental.service.CarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +22,7 @@ import java.util.List;
 public class CarServiceImpl implements CarService {
     private final CarRepository carRepository;
     private final CarMapper carMapper;
+    private final CarSpecificationBuilder carSpecificationBuilder;
 
 
     @Override
@@ -32,8 +36,11 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public List<CarResponseDto> getAll(Pageable pageable) {
-        return carRepository.findAll(pageable).stream()
+    public List<CarResponseDto> getAll(CarSearchParameters parameters, Pageable pageable) {
+        Specification<Car> spec = carSpecificationBuilder.build(parameters);
+
+        return carRepository.findAll(spec, pageable)
+                .stream()
                 .map(carMapper::toDto)
                 .toList();
     }
