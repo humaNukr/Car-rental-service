@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -32,7 +33,7 @@ public class RentalController {
         return rentalService.createRental(rentalDto);
     }
 
-    @PutMapping("/{id}/update")
+    @PatchMapping("/{id}/update")
     public RentalResponseDto updateRental(@PathVariable Long id, @RequestBody @Valid RentalUpdateRequestDto rentalDto) {
         return rentalService.updateRental(id, rentalDto);
     }

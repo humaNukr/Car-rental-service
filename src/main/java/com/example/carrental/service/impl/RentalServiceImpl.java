@@ -60,7 +60,7 @@ public class RentalServiceImpl implements RentalService {
                 .orElseThrow(() -> new EntityNotFoundException("Rental not found"));
 
         if (rental.getActualReturnDate() != null) {
-            throw new RuntimeException("Cannot update a finished rental");
+            throw new RentalAlreadyFinishedException("Cannot update a finished rental");
         }
 
         rentalMapper.updateRentalFromDto(requestDto, rental);
@@ -99,7 +99,9 @@ public class RentalServiceImpl implements RentalService {
 
     @Override
     public List<RentalResponseDto> getAllActive(Pageable pageable) {
-        return List.of();
+        return rentalRepository.findAllByActualReturnDateIsNull(pageable).stream()
+                .map(rentalMapper::toDto)
+                .toList();
     }
 
     private User getCurrentUser() {
