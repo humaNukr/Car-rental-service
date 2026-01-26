@@ -2,7 +2,9 @@ package com.example.carrental.exception;
 
 import com.example.carrental.dto.exception.ErrorResponse;
 import com.example.carrental.exception.base.EntityNotFoundException;
+import com.example.carrental.exception.car.CarUnavailableException;
 import com.example.carrental.exception.car.LicensePlateAlreadyExistsException;
+import com.example.carrental.exception.rental.RentalAlreadyFinishedException;
 import com.example.carrental.exception.user.UserAlreadyExistsException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -31,6 +33,28 @@ import java.util.Map;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(RentalAlreadyFinishedException.class)
+    public ResponseEntity<ErrorResponse> handleRentalAlreadyFinishedException(CarUnavailableException ex) {
+        log.warn(ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(CarUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleCarUnavailableException(CarUnavailableException ex) {
+        log.info(ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
 
     @ExceptionHandler(LicensePlateAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleLicensePlateAlreadyExistsException(LicensePlateAlreadyExistsException ex) {
@@ -109,7 +133,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
-    // 3. Для "битого" токена (наприклад, обрізаний рядок)
     @ExceptionHandler(MalformedJwtException.class)
     public ResponseEntity<Object> handleMalformedJwtException(MalformedJwtException ex) {
         log.warn("Malformed JWT: {}", ex.getMessage());
@@ -144,7 +167,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         List<ObjectError> validationErrors = ex.getBindingResult().getAllErrors();
 
         for (ObjectError error : validationErrors) {
-            String fieldName = ((FieldError) error).getField();
+            String fieldName;
+            if (error instanceof FieldError fe) {
+                fieldName = fe.getField();
+            } else {
+                fieldName = error.getObjectName();
+            }
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         }

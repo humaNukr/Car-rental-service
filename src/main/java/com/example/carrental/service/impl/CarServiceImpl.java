@@ -8,7 +8,7 @@ import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.exception.car.LicensePlateAlreadyExistsException;
 import com.example.carrental.mapper.car.CarMapper;
 import com.example.carrental.repository.CarRepository;
-import com.example.carrental.repository.CarSpecificationBuilder;
+import com.example.carrental.repository.spec.CarSpecificationBuilder;
 import com.example.carrental.service.CarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
