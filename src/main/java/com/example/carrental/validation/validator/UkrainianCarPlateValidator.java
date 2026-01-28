@@ -15,7 +15,9 @@ public class UkrainianCarPlateValidator implements ConstraintValidator<Ukrainian
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (value == null) return false;
+        if (value == null) {
+            return false;
+        }
 
         return value.matches(TYPE1_15)
                 || value.matches(TYPE4)

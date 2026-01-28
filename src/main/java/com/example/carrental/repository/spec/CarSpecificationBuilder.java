@@ -1,4 +1,4 @@
-package com.example.carrental.repository;
+package com.example.carrental.repository.spec;
 
 import com.example.carrental.dto.car.CarSearchParameters;
 import com.example.carrental.entity.Car;

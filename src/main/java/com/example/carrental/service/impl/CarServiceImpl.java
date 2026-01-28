@@ -8,7 +8,7 @@ import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.exception.car.LicensePlateAlreadyExistsException;
 import com.example.carrental.mapper.car.CarMapper;
 import com.example.carrental.repository.CarRepository;
-import com.example.carrental.repository.CarSpecificationBuilder;
+import com.example.carrental.repository.spec.CarSpecificationBuilder;
 import com.example.carrental.service.CarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +23,6 @@ public class CarServiceImpl implements CarService {
     private final CarRepository carRepository;
     private final CarMapper carMapper;
     private final CarSpecificationBuilder carSpecificationBuilder;
-
 
     @Override
     public CarResponseDto save(CarRequestDto dto) {
@@ -62,7 +61,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public void delete(Long id) {
-        if(!carRepository.existsById(id)) {
+        if (!carRepository.existsById(id)) {
             throw new EntityNotFoundException("Car not found with id: " + id);
         }
         carRepository.deleteById(id);

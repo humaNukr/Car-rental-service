@@ -40,7 +40,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
             filterChain.doFilter(request, response);
-        }catch (Exception e) {
+        } catch (Exception e) {
             handlerExceptionResolver.resolveException(request, response, null, e);
         }
     }

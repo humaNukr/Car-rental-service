@@ -6,6 +6,8 @@ import com.example.carrental.enums.UserRole;
 
 public interface UserService {
     UserResponseDto updateRole(Long id, UserRole role);
+
     UserResponseDto getProfile();
+
     UserResponseDto updateProfile(UserUpdateRequestDto requestDto);
 }

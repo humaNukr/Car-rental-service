@@ -1,8 +1,7 @@
 package com.example.carrental.util;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -25,6 +24,9 @@ public abstract class BaseIntegrationTest {
         POSTGRES.start();
     }
 
+    @LocalServerPort
+    protected int port;
+
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
@@ -33,6 +35,10 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.liquibase.url", POSTGRES::getJdbcUrl);
         registry.add("spring.liquibase.user", POSTGRES::getUsername);
         registry.add("spring.liquibase.password", POSTGRES::getPassword);
+    }
+
+    protected String createUrl(String uri) {
+        return "http://localhost:" + port + uri;
     }
 
 }

@@ -42,9 +42,6 @@ class UserControllerIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @LocalServerPort
-    private int port;
-
     @BeforeEach
     void setUp() {
         jdbcTemplate.execute("TRUNCATE TABLE users CASCADE");
@@ -198,11 +195,7 @@ class UserControllerIntegrationTest extends BaseIntegrationTest {
                 loginRequest,
                 JwtAuthenticationDto.class
         );
+        assertNotNull(response.getBody());
         return response.getBody().getToken();
     }
-
-    private String createUrl(String uri) {
-        return "http://localhost:" + port + uri;
-    }
-
 }
