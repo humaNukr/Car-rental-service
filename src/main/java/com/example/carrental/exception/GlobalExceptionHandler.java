@@ -6,10 +6,7 @@ import com.example.carrental.exception.car.CarUnavailableException;
 import com.example.carrental.exception.car.LicensePlateAlreadyExistsException;
 import com.example.carrental.exception.rental.RentalAlreadyFinishedException;
 import com.example.carrental.exception.user.UserAlreadyExistsException;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
@@ -28,134 +25,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(RentalAlreadyFinishedException.class)
-    public ResponseEntity<ErrorResponse> handleRentalAlreadyFinishedException(RentalAlreadyFinishedException ex) {
-        log.warn(ex.getMessage());
-        ErrorResponse response = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.CONFLICT.value(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(CarUnavailableException.class)
-    public ResponseEntity<ErrorResponse> handleCarUnavailableException(CarUnavailableException ex) {
-        log.info(ex.getMessage());
-        ErrorResponse response = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.CONFLICT.value(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(LicensePlateAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleLicensePlateAlreadyExistsException(
-            LicensePlateAlreadyExistsException ex) {
-        log.warn("License plate already exists: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.CONFLICT.value(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException ex) {
-        log.warn("Entity not found: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.NOT_FOUND.value(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<Object> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
-        log.warn("User already exists: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.CONFLICT.value(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Object> handleBadCredentials(BadCredentialsException ex) {
-        log.warn("Bad credentials: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.UNAUTHORIZED.value(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex) {
-        log.warn("Access denied: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.FORBIDDEN.value(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-    }
-
-    @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<Object> handleExpiredJwtException(ExpiredJwtException ex) {
-        log.warn("Expired JWT Exception: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.UNAUTHORIZED.value(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(SignatureException.class)
-    public ResponseEntity<Object> handleSignatureException(SignatureException ex) {
-        log.warn("Signature Exception: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.UNAUTHORIZED.value(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(MalformedJwtException.class)
-    public ResponseEntity<Object> handleMalformedJwtException(MalformedJwtException ex) {
-        log.warn("Malformed JWT: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.UNAUTHORIZED.value(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(JwtException.class)
-    public ResponseEntity<Object> handleGeneralJwtException(JwtException ex) {
-        log.warn("JWT Exception: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.UNAUTHORIZED.value(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-    }
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -163,53 +38,72 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             @NonNull HttpHeaders headers,
             @NonNull HttpStatusCode status,
             @NonNull WebRequest request
-
     ) {
         Map<String, String> errors = new LinkedHashMap<>();
-        List<ObjectError> validationErrors = ex.getBindingResult().getAllErrors();
-
-        for (ObjectError error : validationErrors) {
-            String fieldName;
-            if (error instanceof FieldError fe) {
-                fieldName = fe.getField();
-            } else {
-                fieldName = error.getObjectName();
-            }
+        for (ObjectError error : ex.getBindingResult().getAllErrors()) {
+            String fieldName = (error instanceof FieldError fe) ? fe.getField() : error.getObjectName();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         }
 
-        log.warn("Validation failed: {}", errors);
-
-        ErrorResponse errorResponse = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                errors
-        );
-
-        return new ResponseEntity<>(errorResponse, headers, status);
+        return buildResponse(HttpStatus.BAD_REQUEST, "Validation failed", errors);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
-        log.error("Runtime exception occurred", ex);
-        ErrorResponse response = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+
+
+    @ExceptionHandler({
+            UserAlreadyExistsException.class,
+            LicensePlateAlreadyExistsException.class,
+            CarUnavailableException.class,
+            RentalAlreadyFinishedException.class
+    })
+    public ResponseEntity<Object> handleConflictExceptions(RuntimeException ex) {
+        log.warn("Conflict: [{}] {}", ex.getClass().getSimpleName(), ex.getMessage());
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Object> handleBadCredentials(BadCredentialsException ex) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid username or password");
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Access denied");
+    }
+
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<Object> handleJwtException(JwtException ex) {
+        log.warn("JWT Error: {}", ex.getMessage());
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAllExceptions(Exception ex) {
-        log.error("Unhandled exception", ex);
-        ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Something went wrong. Please try again later."
-        );
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+        log.error("Unexpected error", ex);
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong. Please try again later.");
     }
 
+
+    private ResponseEntity<Object> buildResponse(HttpStatus status, String message, Map<String, String> errors) {
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                message,
+                errors
+        );
+        return new ResponseEntity<>(response, status);
+    }
+
+    private ResponseEntity<Object> buildResponse(HttpStatus status, String message) {
+        return buildResponse(status, message, null);
+    }
 }
