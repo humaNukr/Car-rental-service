@@ -24,7 +24,6 @@ public class CarServiceImpl implements CarService {
     private final CarMapper carMapper;
     private final CarSpecificationBuilder carSpecificationBuilder;
 
-
     @Override
     public CarResponseDto save(CarRequestDto dto) {
         if (carRepository.existsByLicensePlate(dto.getLicensePlate())) {
@@ -62,7 +61,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public void delete(Long id) {
-        if(!carRepository.existsById(id)) {
+        if (!carRepository.existsById(id)) {
             throw new EntityNotFoundException("Car not found with id: " + id);
         }
         carRepository.deleteById(id);

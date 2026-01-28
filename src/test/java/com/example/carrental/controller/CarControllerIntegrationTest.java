@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -36,9 +35,6 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    @LocalServerPort
-    private int port;
 
     @BeforeEach
     void setUp() {
@@ -133,14 +129,10 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
 
             List<CarResponseDto> cars = response.getBody();
 
+            assertNotNull(cars);
             assertEquals(1, cars.size());
-            assertEquals("X5", cars.get(0).getModel());
+            assertEquals("X5", cars.getFirst().getModel());
         }
-    }
-
-
-    private String createUrl(String url) {
-        return "http://localhost:" + port + url;
     }
 
     private void createTestCars() {

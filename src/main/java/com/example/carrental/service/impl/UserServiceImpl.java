@@ -23,7 +23,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper mapper;
 
-
     @Override
     @Transactional
     public UserResponseDto updateRole(Long id, UserRole role) {

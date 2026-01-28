@@ -14,6 +14,8 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = {RentalPeriodValidator.class})
 public @interface ValidRentalPeriod {
     String message() default "Return date must be after rental date";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

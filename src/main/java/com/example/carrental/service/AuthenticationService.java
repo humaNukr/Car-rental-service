@@ -8,6 +8,8 @@ import com.example.carrental.dto.user.UserResponseDto;
 
 public interface AuthenticationService {
     UserResponseDto register(UserRegistrationRequestDto request);
+
     JwtAuthenticationDto login(UserLoginRequestDto request);
+
     JwtAuthenticationDto refreshToken(RefreshTokenDto refreshTokenDto);
 }

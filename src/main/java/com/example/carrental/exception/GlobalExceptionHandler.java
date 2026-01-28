@@ -11,6 +11,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -35,7 +36,7 @@ import java.util.Map;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(RentalAlreadyFinishedException.class)
-    public ResponseEntity<ErrorResponse> handleRentalAlreadyFinishedException(CarUnavailableException ex) {
+    public ResponseEntity<ErrorResponse> handleRentalAlreadyFinishedException(RentalAlreadyFinishedException ex) {
         log.warn(ex.getMessage());
         ErrorResponse response = new ErrorResponse(
                 LocalDateTime.now(),
@@ -57,7 +58,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(LicensePlateAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleLicensePlateAlreadyExistsException(LicensePlateAlreadyExistsException ex) {
+    public ResponseEntity<ErrorResponse> handleLicensePlateAlreadyExistsException(
+            LicensePlateAlreadyExistsException ex) {
         log.warn("License plate already exists: {}", ex.getMessage());
         ErrorResponse response = new ErrorResponse(
                 LocalDateTime.now(),
@@ -158,9 +160,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
-            HttpHeaders headers,
-            HttpStatusCode status,
-            WebRequest request
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request
 
     ) {
         Map<String, String> errors = new LinkedHashMap<>();
