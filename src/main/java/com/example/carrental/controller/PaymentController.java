@@ -39,7 +39,8 @@ public class PaymentController {
 
     @Operation(summary = "Handle cancel redirect", description = "User cancelled payment")
     @GetMapping("/cancel")
-    public String handleCancel() {
-        return "Payment cancelled. You can try again later.";
+    public String handleCancel(@RequestParam("session_id") String sessionId) {
+        paymentService.handlePaymentCancel(sessionId);
+        return "Payment cancelled successfully. You can close this tab or try again.";
     }
 }

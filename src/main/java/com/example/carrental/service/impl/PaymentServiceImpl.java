@@ -17,12 +17,14 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
@@ -40,6 +42,20 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentResponseDto createPaymentSession(PaymentRequestDto requestDto) {
         Rental rental = rentalRepository.findById(requestDto.getRentalId())
                 .orElseThrow(() -> new EntityNotFoundException("Rental not found"));
+
+        paymentRepository.findByRentalIdAndStatus(rental.getId(), PaymentStatus.PENDING)
+                .ifPresent(existingPayment -> {
+                    try {
+                        Session session = Session.retrieve(existingPayment.getSessionId());
+                        session.expire();
+                    } catch (StripeException e) {
+                        log.warn("Session already expired or not found: {}", e.getMessage());
+                    }
+
+                    existingPayment.setStatus(PaymentStatus.CANCELED);
+                    existingPayment.setDeleted(true);
+                    paymentRepository.save(existingPayment);
+                });
 
         BigDecimal amountToPay = calculateAmount(rental, requestDto);
 
@@ -78,6 +94,17 @@ public class PaymentServiceImpl implements PaymentService {
         } catch (StripeException e) {
             throw new RuntimeException("Error verifying payment with Stripe", e);
         }
+    }
+
+    @Override
+    @Transactional
+    public void handlePaymentCancel(String sessionId) {
+        Payment payment = paymentRepository.findBySessionId(sessionId)
+                .orElseThrow(() -> new EntityNotFoundException("Payment not found for session: " + sessionId));
+
+        payment.setStatus(PaymentStatus.CANCELED);
+        payment.setDeleted(true);
+        paymentRepository.save(payment);
     }
 
 

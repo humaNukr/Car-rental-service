@@ -1,6 +1,7 @@
 package com.example.carrental.repository;
 
 import com.example.carrental.entity.Payment;
+import com.example.carrental.enums.PaymentStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -13,4 +14,5 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     @EntityGraph(attributePaths = {"rental"})
     List<Payment> findAllByRentalUserId(Long userId);
 
+    Optional<Payment> findByRentalIdAndStatus(Long rentalId, PaymentStatus status);
 }

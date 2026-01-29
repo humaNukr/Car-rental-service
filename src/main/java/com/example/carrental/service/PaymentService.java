@@ -7,4 +7,6 @@ public interface PaymentService {
     PaymentResponseDto createPaymentSession(PaymentRequestDto requestDto);
 
     PaymentResponseDto handlePaymentSuccess(String sessionId);
+
+    void handlePaymentCancel(String sessionId);
 }
