@@ -58,14 +58,20 @@ public class SecurityConfig {
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/cars",
-                                "/api/cars/**")
+                                "/api/cars/**"
+                        )
+                        .permitAll()
+                        .requestMatchers(
+                                "/api/payments/success",
+                                "/api/payments/cancel"
+                        )
                         .permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
-                ))
+                        ))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(entryPoint))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

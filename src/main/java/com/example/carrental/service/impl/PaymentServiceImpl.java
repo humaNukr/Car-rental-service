@@ -66,7 +66,7 @@ public class PaymentServiceImpl implements PaymentService {
         try {
             Session session = Session.retrieve(sessionId);
 
-            if ("complete".equals(session.getPaymentStatus())) {
+            if ("paid".equals(session.getPaymentStatus())) {
 
                 payment.setStatus(PaymentStatus.PAID);
 
@@ -141,4 +141,4 @@ public class PaymentServiceImpl implements PaymentService {
         return rental.getCar().getDailyFee().multiply(BigDecimal.valueOf(days));
     }
 }
-}
+
