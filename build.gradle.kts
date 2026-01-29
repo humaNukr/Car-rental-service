@@ -34,6 +34,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.15")
+    implementation("com.stripe:stripe-java:24.15.0")
 
     compileOnly("org.projectlombok:lombok:1.18.32")
     runtimeOnly("org.postgresql:postgresql")
