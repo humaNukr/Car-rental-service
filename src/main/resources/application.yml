@@ -30,3 +30,6 @@ stripe:
   api-key: ${STRIPE_API_KEY}
   success-url: http://localhost:8080/api/payments/success
   cancel-url: http://localhost:8080/api/payments/cancel
+
+scheduler:
+  fixed-delay: 60000
