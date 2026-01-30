@@ -15,6 +15,7 @@ import com.example.carrental.enums.UserRole;
 import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.RentalRepository;
 import com.example.carrental.repository.UserRepository;
+import com.example.carrental.service.NotificationService;
 import com.example.carrental.util.BaseIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -52,6 +54,8 @@ class RentalControllerIntegrationTest extends BaseIntegrationTest {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @MockitoBean
+    private NotificationService notificationService;
 
     private User defaultCustomer;
     private Car defaultCar;
