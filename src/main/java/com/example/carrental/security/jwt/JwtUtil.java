@@ -17,10 +17,10 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${jwt.accessTokenExpirationMs}")
+    @Value("${jwt.access-token-expiration-ms}")
     private Long accessTokenExpiration;
 
-    @Value("${jwt.refreshTokenExpirationMs}")
+    @Value("${jwt.refresh-token-expiration-ms}")
     private Long refreshTokenExpiration;
 
     public String generateAccessToken(String email) {
