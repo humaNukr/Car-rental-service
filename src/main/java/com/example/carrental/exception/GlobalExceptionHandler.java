@@ -4,6 +4,7 @@ import com.example.carrental.dto.exception.ErrorResponse;
 import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.exception.car.CarUnavailableException;
 import com.example.carrental.exception.car.LicensePlateAlreadyExistsException;
+import com.example.carrental.exception.notification.TelegramBotException;
 import com.example.carrental.exception.rental.RentalAlreadyFinishedException;
 import com.example.carrental.exception.user.UserAlreadyExistsException;
 import io.jsonwebtoken.JwtException;
@@ -47,6 +48,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
 
         return buildResponse(HttpStatus.BAD_REQUEST, "Validation failed", errors);
+    }
+
+    @ExceptionHandler(TelegramBotException.class)
+    public ResponseEntity<Object> handleTelegramBotException(TelegramBotException ex) {
+        log.error("Telegram Bot Error: {}", ex.getMessage(), ex);
+        return buildResponse(HttpStatus.SERVICE_UNAVAILABLE,
+                "Telegram service is currently unavailable. Please try again later.");
     }
 
 

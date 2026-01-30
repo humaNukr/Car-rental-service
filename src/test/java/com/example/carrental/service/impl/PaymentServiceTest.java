@@ -6,11 +6,13 @@ import com.example.carrental.dto.payment.PaymentResponseDto;
 import com.example.carrental.entity.Car;
 import com.example.carrental.entity.Payment;
 import com.example.carrental.entity.Rental;
+import com.example.carrental.entity.User;
 import com.example.carrental.enums.PaymentStatus;
 import com.example.carrental.enums.PaymentType;
 import com.example.carrental.mapper.payment.PaymentMapper;
 import com.example.carrental.repository.PaymentRepository;
 import com.example.carrental.repository.RentalRepository;
+import com.example.carrental.service.NotificationService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
@@ -48,6 +50,8 @@ class PaymentServiceTest {
     private PaymentRepository paymentRepository;
     @Mock
     private RentalRepository rentalRepository;
+    @Mock
+    private NotificationService notificationService;
 
     StripeProperties props;
 
@@ -147,8 +151,18 @@ class PaymentServiceTest {
         @DisplayName("Should mark payment as PAID if Stripe confirms")
         void shouldMarkPaymentAsPaidIfStripeConfirms() {
             String sessionId = "sess_success";
+
+            User user = new User();
+            user.setEmail("email@test");
+
+            Rental rental = new Rental();
+            rental.setId(1L);
+            rental.setUser(user);
+
             Payment payment = new Payment();
             payment.setStatus(PaymentStatus.PENDING);
+            payment.setAmount(BigDecimal.valueOf(100));
+            payment.setRental(rental);
 
             when(paymentRepository.findBySessionId(sessionId)).thenReturn(Optional.of(payment));
 
@@ -156,12 +170,15 @@ class PaymentServiceTest {
             when(session.getPaymentStatus()).thenReturn("paid");
             sessionMock.when(() -> Session.retrieve(sessionId)).thenReturn(session);
 
-            when(paymentRepository.save(any(Payment.class))).thenAnswer(i -> i.getArgument(0));
+            when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
 
             PaymentResponseDto result = paymentService.handlePaymentSuccess(sessionId);
 
             assertEquals(PaymentStatus.PAID, result.getStatus());
+            assertEquals(BigDecimal.valueOf(100), result.getAmount());
+            assertEquals(1L, result.getRentalId());
         }
+
 
         @Test
         @DisplayName("Handle Cancel: Should mark payment as CANCELED")

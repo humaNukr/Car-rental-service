@@ -14,6 +14,7 @@ import com.example.carrental.mapper.rental.RentalMapper;
 import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.RentalRepository;
 import com.example.carrental.repository.UserRepository;
+import com.example.carrental.service.NotificationService;
 import com.example.carrental.service.RentalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,7 @@ public class RentalServiceImpl implements RentalService {
     private final CarRepository carRepository;
     private final UserRepository userRepository;
     private final RentalMapper rentalMapper;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -49,6 +51,8 @@ public class RentalServiceImpl implements RentalService {
 
         car.setStatus(CarStatus.RENTED);
         carRepository.save(car);
+
+        notificationService.sendNotification("New Rental Created!\nCar ID: " + rental.getCar().getId());
 
         return rentalMapper.toDto(rentalRepository.save(rental));
     }

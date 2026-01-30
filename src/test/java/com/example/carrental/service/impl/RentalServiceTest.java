@@ -11,6 +11,7 @@ import com.example.carrental.mapper.rental.RentalMapper;
 import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.RentalRepository;
 import com.example.carrental.repository.UserRepository;
+import com.example.carrental.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -46,6 +47,8 @@ class RentalServiceTest {
     private CarRepository carRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private NotificationService notificationService;
 
     private final RentalMapper rentalMapper = Mappers.getMapper(RentalMapper.class);
 
@@ -69,7 +72,8 @@ class RentalServiceTest {
                 rentalRepository,
                 carRepository,
                 userRepository,
-                rentalMapper
+                rentalMapper,
+                notificationService
         );
 
         defaultUser = new User();
