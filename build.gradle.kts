@@ -50,7 +50,13 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.springframework.security:spring-security-test")
+    runtimeOnly("com.h2database:h2")
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testCompileOnly("org.projectlombok:lombok:1.18.32")
+
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.32")
+
 }
 
 checkstyle {
