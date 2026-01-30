@@ -4,6 +4,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.util.TimeZone;
@@ -14,6 +16,9 @@ import java.util.TimeZone;
         "bot.admin-chat-id=123"
 })
 public abstract class BaseIntegrationTest {
+
+    @MockitoBean
+    private TelegramBotsApi telegramBotsApi;
 
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:15")
             .withDatabaseName("car_rental_test")

@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
 
 import java.math.BigDecimal;
 
@@ -44,6 +45,9 @@ public class PaymentControllerIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private TelegramBotsApi telegramBotsApi;
 
     @MockitoBean
     private PaymentService paymentService;
