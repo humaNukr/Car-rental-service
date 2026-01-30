@@ -117,7 +117,6 @@ public class PaymentServiceImpl implements PaymentService {
         paymentRepository.save(payment);
     }
 
-
     private Session createStripeSession(BigDecimal amount, String carModel, PaymentType type)
             throws StripeException {
 
@@ -148,7 +147,6 @@ public class PaymentServiceImpl implements PaymentService {
         return Session.create(params);
     }
 
-
     private Payment createPayment(
             Rental rental, String url, String sessionId,
             BigDecimal amountToPay, PaymentStatus paymentStatus, @NotNull PaymentType type
@@ -163,7 +161,6 @@ public class PaymentServiceImpl implements PaymentService {
         return payment;
     }
 
-
     private BigDecimal calculateAmount(Rental rental, PaymentRequestDto requestDto) {
         if (requestDto.getType() == PaymentType.FINE) {
             if (requestDto.getAmount() == null) {
@@ -173,7 +170,9 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         long days = ChronoUnit.DAYS.between(rental.getRentalDate(), rental.getReturnDate());
-        if (days == 0) days = 1;
+        if (days == 0) {
+            days = 1;
+        }
 
         return rental.getCar().getDailyFee().multiply(BigDecimal.valueOf(days));
     }

@@ -5,7 +5,6 @@ import com.example.carrental.enums.PaymentType;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.net.URL;
 
 @Data
 public class PaymentResponseDto {

@@ -41,6 +41,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class RentalServiceTest {
 
+    private final RentalMapper rentalMapper = Mappers.getMapper(RentalMapper.class);
+    private final String USER_EMAIL = "test@user.com";
     @Mock
     private RentalRepository rentalRepository;
     @Mock
@@ -49,22 +51,15 @@ class RentalServiceTest {
     private UserRepository userRepository;
     @Mock
     private NotificationService notificationService;
-
-    private final RentalMapper rentalMapper = Mappers.getMapper(RentalMapper.class);
-
     @Mock
     private SecurityContext securityContext;
     @Mock
     private Authentication authentication;
-
     @Captor
     private ArgumentCaptor<Rental> rentalCaptor;
-
     private RentalServiceImpl rentalService;
-
     private User defaultUser;
     private Car defaultCar;
-    private final String USER_EMAIL = "test@user.com";
 
     @BeforeEach
     void setUp() {
@@ -85,6 +80,12 @@ class RentalServiceTest {
         defaultCar.setBrand("BMW");
         defaultCar.setStatus(CarStatus.AVAILABLE);
         defaultCar.setDailyFee(java.math.BigDecimal.TEN);
+    }
+
+    private void mockSecurityContext(String email) {
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn(email);
+        SecurityContextHolder.setContext(securityContext);
     }
 
     @Nested
@@ -176,7 +177,7 @@ class RentalServiceTest {
         @DisplayName("Fail: Should throw if rental is already finished")
         void shouldThrowIfAlreadyReturned() {
             Rental rental = new Rental();
-            rental.setActualReturnDate(LocalDate.now()); // Вже закрита
+            rental.setActualReturnDate(LocalDate.now());
 
             when(rentalRepository.findById(1L)).thenReturn(Optional.of(rental));
 
@@ -208,12 +209,5 @@ class RentalServiceTest {
 
             assertEquals(rental.getRentalDate(), result.getRentalDate());
         }
-    }
-
-
-    private void mockSecurityContext(String email) {
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn(email);
-        SecurityContextHolder.setContext(securityContext);
     }
 }

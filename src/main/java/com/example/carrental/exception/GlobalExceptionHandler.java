@@ -32,7 +32,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
@@ -57,12 +56,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 "Telegram service is currently unavailable. Please try again later.");
     }
 
-
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
-
 
     @ExceptionHandler({
             UserAlreadyExistsException.class,
@@ -85,20 +82,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponse(HttpStatus.FORBIDDEN, "Access denied");
     }
 
-
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<Object> handleJwtException(JwtException ex) {
         log.warn("JWT Error: {}", ex.getMessage());
         return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
     }
 
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAllExceptions(Exception ex) {
         log.error("Unexpected error", ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong. Please try again later.");
     }
-
 
     private ResponseEntity<Object> buildResponse(HttpStatus status, String message, Map<String, String> errors) {
         ErrorResponse response = new ErrorResponse(

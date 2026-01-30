@@ -47,6 +47,34 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
         jdbcTemplate.execute("TRUNCATE TABLE cars CASCADE");
     }
 
+    private void createTestCars() {
+        saveCar("BMW", "X5", CarType.SUV, "Black",
+                "AA0001AA", 150, CarStatus.AVAILABLE);
+
+        saveCar("Toyota", "Camry", CarType.SEDAN, "Purple",
+                "AA0002AA", 50, CarStatus.AVAILABLE);
+
+        saveCar("BMW", "320", CarType.SEDAN, "White",
+                "AA0003AA", 90, CarStatus.AVAILABLE);
+
+        saveCar("Audi", "A4", CarType.WAGON, "Blue",
+                "AA0004AA", 80, CarStatus.AVAILABLE);
+    }
+
+    private void saveCar(String brand, String model, CarType type, String color,
+                         String plate, double fee, CarStatus status) {
+        Car car = new Car();
+        car.setBrand(brand);
+        car.setModel(model);
+        car.setType(type);
+        car.setColor(color);
+        car.setLicensePlate(plate);
+        car.setDailyFee(BigDecimal.valueOf(fee));
+        car.setStatus(status);
+        car.setDeleted(false);
+        carRepository.save(car);
+    }
+
     @Nested
     @DisplayName("Filter tests")
     class FilterTests {
@@ -109,8 +137,8 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
 
             assertEquals(3, cars.size());
             assertTrue(cars.stream().allMatch(c ->
-                    c.getDailyFee().compareTo(BigDecimal.valueOf(40)) >= 0 &&
-                            c.getDailyFee().compareTo(BigDecimal.valueOf(100)) <= 0
+                    c.getDailyFee().compareTo(BigDecimal.valueOf(40)) >= 0
+                            && c.getDailyFee().compareTo(BigDecimal.valueOf(100)) <= 0
             ));
         }
 
@@ -133,34 +161,6 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             assertEquals(1, cars.size());
             assertEquals("X5", cars.getFirst().getModel());
         }
-    }
-
-    private void createTestCars() {
-        saveCar("BMW", "X5", CarType.SUV, "Black",
-                "AA0001AA", 150, CarStatus.AVAILABLE);
-
-        saveCar("Toyota", "Camry", CarType.SEDAN, "Purple",
-                "AA0002AA", 50, CarStatus.AVAILABLE);
-
-        saveCar("BMW", "320", CarType.SEDAN, "White",
-                "AA0003AA", 90, CarStatus.AVAILABLE);
-
-        saveCar("Audi", "A4", CarType.WAGON, "Blue",
-                "AA0004AA", 80, CarStatus.AVAILABLE);
-    }
-
-    private void saveCar(String brand, String model, CarType type, String color,
-                         String plate, double fee, CarStatus status) {
-        Car car = new Car();
-        car.setBrand(brand);
-        car.setModel(model);
-        car.setType(type);
-        car.setColor(color);
-        car.setLicensePlate(plate);
-        car.setDailyFee(BigDecimal.valueOf(fee));
-        car.setStatus(status);
-        car.setDeleted(false);
-        carRepository.save(car);
     }
 
 }

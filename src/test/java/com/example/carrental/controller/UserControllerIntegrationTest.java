@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -27,7 +26,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 
 class UserControllerIntegrationTest extends BaseIntegrationTest {
     @Autowired
@@ -50,6 +48,30 @@ class UserControllerIntegrationTest extends BaseIntegrationTest {
     @AfterEach
     void tearDown() {
         jdbcTemplate.execute("TRUNCATE TABLE users CASCADE");
+    }
+
+    private User createTestUser(String email, UserRole role) {
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode("password"));
+        user.setFirstName("Test");
+        user.setLastName("User");
+        user.setRole(role);
+        return userRepository.save(user);
+    }
+
+    private String loginAndGetToken(String email) {
+        UserLoginRequestDto loginRequest = new UserLoginRequestDto();
+        loginRequest.setEmail(email);
+        loginRequest.setPassword("password");
+
+        ResponseEntity<JwtAuthenticationDto> response = testRestTemplate.postForEntity(
+                createUrl("/api/auth/login"),
+                loginRequest,
+                JwtAuthenticationDto.class
+        );
+        assertNotNull(response.getBody());
+        return response.getBody().getToken();
     }
 
     @Nested
@@ -173,29 +195,5 @@ class UserControllerIntegrationTest extends BaseIntegrationTest {
             User user = userRepository.findById(targetUser.getId()).get();
             assertEquals(UserRole.CUSTOMER, user.getRole());
         }
-    }
-
-    private User createTestUser(String email, UserRole role) {
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode("password"));
-        user.setFirstName("Test");
-        user.setLastName("User");
-        user.setRole(role);
-        return userRepository.save(user);
-    }
-
-    private String loginAndGetToken(String email) {
-        UserLoginRequestDto loginRequest = new UserLoginRequestDto();
-        loginRequest.setEmail(email);
-        loginRequest.setPassword("password");
-
-        ResponseEntity<JwtAuthenticationDto> response = testRestTemplate.postForEntity(
-                createUrl("/api/auth/login"),
-                loginRequest,
-                JwtAuthenticationDto.class
-        );
-        assertNotNull(response.getBody());
-        return response.getBody().getToken();
     }
 }

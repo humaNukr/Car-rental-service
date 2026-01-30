@@ -6,7 +6,6 @@ import com.example.carrental.repository.PaymentRepository;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -26,9 +25,9 @@ public class PaymentScheduler {
     @Transactional
     public void checkPendingPayments() {
         LocalDateTime cutoffTime = LocalDateTime.now().minusHours(1);
-        
+
         List<Payment> expiredPayments = paymentRepository.findAllByStatusAndCreatedAtBefore(
-                PaymentStatus.PENDING, 
+                PaymentStatus.PENDING,
                 cutoffTime
         );
 
@@ -50,7 +49,7 @@ public class PaymentScheduler {
             payment.setStatus(PaymentStatus.CANCELED);
             payment.setDeleted(true);
         }
-        
+
         paymentRepository.saveAll(expiredPayments);
     }
 }

@@ -8,17 +8,21 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.util.TimeZone;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
+        "bot.token=test-token",
+        "bot.username=test-bot",
+        "bot.admin-chat-id=123"
+})
 public abstract class BaseIntegrationTest {
-
-    static {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-    }
 
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:15")
             .withDatabaseName("car_rental_test")
             .withUsername("test")
             .withPassword("test");
+
+    static {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    }
 
     static {
         POSTGRES.start();

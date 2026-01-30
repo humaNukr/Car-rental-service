@@ -5,7 +5,6 @@ import com.example.carrental.dto.payment.PaymentResponseDto;
 import com.example.carrental.enums.PaymentStatus;
 import com.example.carrental.enums.PaymentType;
 import com.example.carrental.service.PaymentService;
-import com.example.carrental.util.BaseIntegrationTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
@@ -33,10 +32,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.datasource.driver-class-name=org.h2.Driver",
         "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
         "spring.liquibase.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=none"
+        "spring.jpa.hibernate.ddl-auto=none",
+        "bot.token=test-token",
+        "bot.username=test-bot",
+        "bot.admin-chat-id=123"
 })
 @AutoConfigureMockMvc
-public class PaymentControllerIntegrationTest{
+public class PaymentControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 

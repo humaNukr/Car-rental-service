@@ -2,8 +2,6 @@ package com.example.carrental.controller;
 
 import com.example.carrental.dto.payment.PaymentRequestDto;
 import com.example.carrental.dto.payment.PaymentResponseDto;
-import com.example.carrental.dto.rental.RentalRequestDto;
-import com.example.carrental.dto.rental.RentalResponseDto;
 import com.example.carrental.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;

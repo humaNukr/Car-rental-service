@@ -53,18 +53,16 @@ class PaymentServiceTest {
     @Mock
     private NotificationService notificationService;
 
-    StripeProperties props;
-
-    private final PaymentMapper paymentMapper = Mappers.getMapper(PaymentMapper.class);
-
     @InjectMocks
     private PaymentServiceImpl paymentService;
+
+    private final PaymentMapper paymentMapper = Mappers.getMapper(PaymentMapper.class);
 
     private MockedStatic<Session> sessionMock;
 
     @BeforeEach
     void setUp() {
-        props = new StripeProperties();
+        StripeProperties props = new StripeProperties();
         props.setSuccessUrl("http://success");
         props.setCancelUrl("http://cancel");
         ReflectionTestUtils.setField(paymentService, "stripeProperties", props);
@@ -75,6 +73,19 @@ class PaymentServiceTest {
     @AfterEach
     void tearDown() {
         sessionMock.close();
+    }
+
+    private Rental createNewRental() {
+        Car car = new Car();
+        car.setDailyFee(BigDecimal.valueOf(100));
+        car.setModel("Tesla");
+
+        Rental rental = new Rental();
+        rental.setId(1L);
+        rental.setCar(car);
+        rental.setRentalDate(LocalDate.now());
+        rental.setReturnDate(LocalDate.now().plusDays(2));
+        return rental;
     }
 
     @Nested
@@ -114,7 +125,6 @@ class PaymentServiceTest {
         @Test
         @DisplayName("Create Session: Should cancel existing PENDING payment")
         void shouldCancelExistingPayment() throws StripeException {
-            Rental rental = createNewRental();
             PaymentRequestDto request = new PaymentRequestDto();
             request.setType(PaymentType.PAYMENT);
             request.setRentalId(1L);
@@ -123,6 +133,7 @@ class PaymentServiceTest {
             oldPayment.setId(99L);
             oldPayment.setStatus(PaymentStatus.PENDING);
             oldPayment.setSessionId("sess_old");
+            Rental rental = createNewRental();
 
             when(rentalRepository.findById(1L)).thenReturn(Optional.of(rental));
             when(paymentRepository.findByRentalIdAndStatus(1L, PaymentStatus.PENDING))
@@ -150,8 +161,6 @@ class PaymentServiceTest {
         @Test
         @DisplayName("Should mark payment as PAID if Stripe confirms")
         void shouldMarkPaymentAsPaidIfStripeConfirms() {
-            String sessionId = "sess_success";
-
             User user = new User();
             user.setEmail("email@test");
 
@@ -163,6 +172,7 @@ class PaymentServiceTest {
             payment.setStatus(PaymentStatus.PENDING);
             payment.setAmount(BigDecimal.valueOf(100));
             payment.setRental(rental);
+            String sessionId = "sess_success";
 
             when(paymentRepository.findBySessionId(sessionId)).thenReturn(Optional.of(payment));
 
@@ -179,7 +189,6 @@ class PaymentServiceTest {
             assertEquals(1L, result.getRentalId());
         }
 
-
         @Test
         @DisplayName("Handle Cancel: Should mark payment as CANCELED")
         void shouldMarkPaymentAsCancelledIfStripeConfirms() {
@@ -195,18 +204,5 @@ class PaymentServiceTest {
             assertEquals(PaymentStatus.CANCELED, payment.getStatus());
             assertTrue(payment.isDeleted());
         }
-    }
-
-    private Rental createNewRental() {
-        Car car = new Car();
-        car.setDailyFee(BigDecimal.valueOf(100));
-        car.setModel("Tesla");
-
-        Rental rental = new Rental();
-        rental.setId(1L);
-        rental.setCar(car);
-        rental.setRentalDate(LocalDate.now());
-        rental.setReturnDate(LocalDate.now().plusDays(2));
-        return rental;
     }
 }

@@ -16,5 +16,5 @@ public class PaymentRequestDto {
     private PaymentType type;
 
     @Positive
-    private BigDecimal amount; 
+    private BigDecimal amount;
 }

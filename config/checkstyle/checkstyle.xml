@@ -220,7 +220,7 @@
         </module>
         <module name="MemberName">
             <property name="format"
-                      value="^(?![a-z]$)(?![a-z][A-Z])[a-z][a-zA-Z0-9]*(?:_[0-9]+)*$"/>
+                      value="^[a-z][a-zA-Z0-9]*$|^[A-Z][A-Z0-9_]*$"/>
             <message key="name.invalidPattern"
                      value="Member name ''{0}'' must match pattern ''{1}''."/>
         </module>
@@ -276,22 +276,6 @@
                      value="GenericWhitespace ''{0}'' is not preceded with whitespace."/>
         </module>
 
-        <module name="Indentation">
-            <property name="basicOffset" value="4"/>
-            <property name="braceAdjustment" value="0"/>
-            <property name="caseIndent" value="4"/>
-            <property name="throwsIndent" value="4"/>
-            <property name="lineWrappingIndentation" value="4"/>
-            <property name="arrayInitIndent" value="4"/>
-        </module>
-
-        <module name="AbbreviationAsWordInName">
-            <property name="ignoreFinal" value="false"/>
-            <property name="allowedAbbreviationLength" value="0"/>
-            <property name="tokens"
-                      value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, ANNOTATION_DEF, ANNOTATION_FIELD_DEF,
-                    PARAMETER_DEF, VARIABLE_DEF, METHOD_DEF, PATTERN_VARIABLE_DEF"/>
-        </module>
         <module name="NoWhitespaceBeforeCaseDefaultColon"/>
         <module name="OverloadMethodsDeclarationOrder"/>
         <module name="VariableDeclarationUsageDistance"/>
@@ -343,9 +327,6 @@
             <property name="format" value="^[ \t]*(?!TODO:)(?i:TODO)\b:?"/>
             <message key="todo.match"
                      value="''TODO:'' must be written in all caps and followed by a colon."/>
-        </module>
-        <module name="EmptyCatchBlock">
-            <property name="commentFormat" value="\w+"/>
         </module>
         <module name="CommentsIndentation">
             <property name="tokens" value="SINGLE_LINE_COMMENT, BLOCK_COMMENT_BEGIN"/>
