@@ -11,6 +11,7 @@ import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.mapper.payment.PaymentMapper;
 import com.example.carrental.repository.PaymentRepository;
 import com.example.carrental.repository.RentalRepository;
+import com.example.carrental.service.NotificationService;
 import com.example.carrental.service.PaymentService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
@@ -36,6 +37,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final StripeProperties stripeProperties;
 
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -85,6 +87,14 @@ public class PaymentServiceImpl implements PaymentService {
             if ("paid".equals(session.getPaymentStatus())) {
 
                 payment.setStatus(PaymentStatus.PAID);
+
+                String message = String.format(
+                        "Payment received!\nRental ID: %d\nAmount: %s $\nUser: %s",
+                        payment.getRental().getId(),
+                        payment.getAmount(),
+                        payment.getRental().getUser().getEmail()
+                );
+                notificationService.sendNotification(message);
 
                 return mapper.toDto(paymentRepository.save(payment));
             } else {

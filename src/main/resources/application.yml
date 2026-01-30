@@ -33,3 +33,8 @@ stripe:
 
 scheduler:
   fixed-delay: 60000
+
+bot:
+  username: "MyCarRentalNotificationBot"
+  token: ${RENTAL_BOT_TOKEN}
+  admin-chat-id: 1456810112
