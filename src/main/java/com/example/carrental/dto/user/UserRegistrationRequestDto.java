@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 public class UserRegistrationRequestDto {
@@ -15,11 +16,13 @@ public class UserRegistrationRequestDto {
     @NotBlank
     @Size(min = 8, max = 100)
     @Password
+    @ToString.Exclude
     private String password;
 
     @NotBlank
     @Size(min = 8, max = 100)
     @Password
+    @ToString.Exclude
     private String confirmPassword;
 
     @NotBlank
