@@ -2,6 +2,9 @@ package com.example.carrental.repository.spec;
 
 import com.example.carrental.dto.car.CarSearchParameters;
 import com.example.carrental.entity.Car;
+import com.example.carrental.entity.Rental;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
@@ -45,6 +48,25 @@ public class CarSpecificationBuilder {
         if (params.maxDailyFee() != null) {
             spec = spec.and((root, query, cb)
                     -> cb.le(root.get("dailyFee"), params.maxDailyFee()));
+        }
+
+        if (params.startDate() != null && params.endDate() != null) {
+            spec = spec.and((root, query, cb) -> {
+                assert query != null;
+                Subquery<Long> subquery = query.subquery(Long.class);
+                Root<Rental> rentalRoot = subquery.from(Rental.class);
+
+                subquery.select(rentalRoot.get("id"));
+                subquery.where(
+                        cb.equal(rentalRoot.get("car"), root),
+                        cb.isNull(rentalRoot.get("actualReturnDate")),
+                        cb.lessThanOrEqualTo(rentalRoot.get("rentalDate"), params.endDate()),
+                        cb.greaterThanOrEqualTo(rentalRoot.get("returnDate"), params.startDate())
+                );
+
+                return cb.not(cb.exists(subquery));
+            });
+
         }
 
         return spec;
