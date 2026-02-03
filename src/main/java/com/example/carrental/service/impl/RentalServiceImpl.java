@@ -1,5 +1,7 @@
 package com.example.carrental.service.impl;
 
+import com.example.carrental.config.RentalProperties;
+import com.example.carrental.dto.payment.CreateFineDto;
 import com.example.carrental.dto.rental.RentalRequestDto;
 import com.example.carrental.dto.rental.RentalResponseDto;
 import com.example.carrental.dto.rental.RentalUpdateRequestDto;
@@ -15,6 +17,7 @@ import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.RentalRepository;
 import com.example.carrental.repository.UserRepository;
 import com.example.carrental.service.NotificationService;
+import com.example.carrental.service.PaymentService;
 import com.example.carrental.service.RentalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +26,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -34,6 +39,8 @@ public class RentalServiceImpl implements RentalService {
     private final UserRepository userRepository;
     private final RentalMapper rentalMapper;
     private final NotificationService notificationService;
+    private final RentalProperties rentalProperties;
+    private final PaymentService paymentService;
 
     @Override
     @Transactional
@@ -96,6 +103,18 @@ public class RentalServiceImpl implements RentalService {
         Car car = rental.getCar();
         car.setStatus(CarStatus.AVAILABLE);
         carRepository.save(car);
+
+        if (rental.getActualReturnDate().isAfter(rental.getReturnDate())) {
+            long lateDays = ChronoUnit.DAYS.between(rental.getReturnDate(), rental.getActualReturnDate());
+            if (lateDays > 0) {
+                BigDecimal dailyFee = rental.getCar().getDailyFee();
+                BigDecimal multiplier = BigDecimal.valueOf(rentalProperties.getFine().getLateReturnMultiplier());
+                BigDecimal fineAmount = dailyFee.multiply(BigDecimal.valueOf(lateDays)).multiply(multiplier);
+
+                CreateFineDto autoFine = new CreateFineDto(fineAmount, "LATE_RETURN");
+                paymentService.createFine(rental.getId(), autoFine);
+            }
+        }
 
         return rentalMapper.toDto(rentalRepository.save(rental));
 

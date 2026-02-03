@@ -1,6 +1,7 @@
 package com.example.carrental.service.impl;
 
 import com.example.carrental.config.StripeProperties;
+import com.example.carrental.dto.payment.CreateFineDto;
 import com.example.carrental.dto.payment.PaymentRequestDto;
 import com.example.carrental.dto.payment.PaymentResponseDto;
 import com.example.carrental.entity.Payment;
@@ -16,7 +17,6 @@ import com.example.carrental.service.PaymentService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -45,21 +45,36 @@ public class PaymentServiceImpl implements PaymentService {
         Rental rental = rentalRepository.findById(requestDto.getRentalId())
                 .orElseThrow(() -> new EntityNotFoundException("Rental not found"));
 
-        paymentRepository.findByRentalIdAndStatus(rental.getId(), PaymentStatus.PENDING)
-                .ifPresent(existingPayment -> {
-                    try {
-                        Session session = Session.retrieve(existingPayment.getSessionId());
-                        session.expire();
-                    } catch (StripeException e) {
-                        log.warn("Session already expired or not found: {}", e.getMessage());
-                    }
+        Payment paymentToProcess;
+        BigDecimal amountToPay;
 
-                    existingPayment.setStatus(PaymentStatus.CANCELED);
-                    existingPayment.setDeleted(true);
-                    paymentRepository.save(existingPayment);
-                });
+        if (requestDto.getType() == PaymentType.PAYMENT) {
 
-        BigDecimal amountToPay = calculateAmount(rental, requestDto);
+            amountToPay = calculateRentalCost(rental);
+
+            paymentToProcess = new Payment();
+            paymentToProcess.setRental(rental);
+            paymentToProcess.setType(PaymentType.PAYMENT);
+            paymentToProcess.setAmount(amountToPay);
+            paymentToProcess.setStatus(PaymentStatus.PENDING);
+
+        } else {
+            paymentToProcess = paymentRepository.findByRentalIdAndStatusAndType(
+                    rental.getId(),
+                    PaymentStatus.PENDING,
+                    PaymentType.FINE
+            ).orElseThrow(() -> new EntityNotFoundException("No pending fines found for this rental"));
+
+            amountToPay = paymentToProcess.getAmount();
+        }
+
+        if (paymentToProcess.getSessionId() != null) {
+            try {
+                Session.retrieve(paymentToProcess.getSessionId()).expire();
+            } catch (StripeException e) {
+                log.warn("Old session expired/not found");
+            }
+        }
 
         Session session;
         try {
@@ -68,12 +83,10 @@ public class PaymentServiceImpl implements PaymentService {
             throw new RuntimeException("Can't create Stripe session", e);
         }
 
-        Payment payment = createPayment(
-                rental, session.getUrl(), session.getId(),
-                amountToPay, PaymentStatus.PENDING, requestDto.getType()
-        );
+        paymentToProcess.setSessionUrl(session.getUrl());
+        paymentToProcess.setSessionId(session.getId());
 
-        return mapper.toDto(paymentRepository.save(payment));
+        return mapper.toDto(paymentRepository.save(paymentToProcess));
     }
 
     @Override
@@ -117,6 +130,20 @@ public class PaymentServiceImpl implements PaymentService {
         paymentRepository.save(payment);
     }
 
+    @Override
+    public PaymentResponseDto createFine(Long rentalId, CreateFineDto fineDto) {
+        Rental rental = rentalRepository.findById(rentalId)
+                .orElseThrow(() -> new EntityNotFoundException("Rental not found"));
+
+        Payment fine = new Payment();
+        fine.setRental(rental);
+        fine.setStatus(PaymentStatus.PENDING);
+        fine.setType(PaymentType.FINE);
+        fine.setAmount(fineDto.amount());
+
+        return mapper.toDto(paymentRepository.save(fine));
+    }
+
     private Session createStripeSession(BigDecimal amount, String carModel, PaymentType type)
             throws StripeException {
 
@@ -147,33 +174,10 @@ public class PaymentServiceImpl implements PaymentService {
         return Session.create(params);
     }
 
-    private Payment createPayment(
-            Rental rental, String url, String sessionId,
-            BigDecimal amountToPay, PaymentStatus paymentStatus, @NotNull PaymentType type
-    ) {
-        Payment payment = new Payment();
-        payment.setRental(rental);
-        payment.setSessionUrl(url);
-        payment.setSessionId(sessionId);
-        payment.setAmount(amountToPay);
-        payment.setStatus(paymentStatus);
-        payment.setType(type);
-        return payment;
-    }
 
-    private BigDecimal calculateAmount(Rental rental, PaymentRequestDto requestDto) {
-        if (requestDto.getType() == PaymentType.FINE) {
-            if (requestDto.getAmount() == null) {
-                throw new IllegalArgumentException("Fine payment amount cannot be null");
-            }
-            return requestDto.getAmount();
-        }
-
+    private BigDecimal calculateRentalCost(Rental rental) {
         long days = ChronoUnit.DAYS.between(rental.getRentalDate(), rental.getReturnDate());
-        if (days == 0) {
-            days = 1;
-        }
-
+        if (days == 0) days = 1;
         return rental.getCar().getDailyFee().multiply(BigDecimal.valueOf(days));
     }
 }
