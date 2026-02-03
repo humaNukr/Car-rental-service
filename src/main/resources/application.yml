@@ -39,6 +39,10 @@ bot:
   token: ${RENTAL_BOT_TOKEN}
   admin-chat-id: 1456810112
 
+rental:
+  fine:
+    late-return-multiplier: 1.5
+
 logging:
   level:
     root: info

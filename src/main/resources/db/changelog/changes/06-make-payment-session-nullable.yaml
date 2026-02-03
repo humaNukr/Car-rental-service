@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 06-make-payment-session-nullable
+      author: humaNukr
+      changes:
+        - dropNotNullConstraint:
+            tableName: payments
+            columnName: session_id
+        - dropNotNullConstraint:
+            tableName: payments
+            columnName: session_url

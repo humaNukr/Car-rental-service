@@ -37,10 +37,10 @@ public class Payment {
     @JoinColumn(name = "rental_id", nullable = false)
     private Rental rental;
 
-    @Column(nullable = false)
+    @Column
     private String sessionUrl;
 
-    @Column(nullable = false)
+    @Column
     private String sessionId;
 
     @Column(nullable = false)

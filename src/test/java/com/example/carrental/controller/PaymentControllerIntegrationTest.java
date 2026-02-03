@@ -1,5 +1,6 @@
 package com.example.carrental.controller;
 
+import com.example.carrental.dto.payment.CreateFineDto;
 import com.example.carrental.dto.payment.PaymentRequestDto;
 import com.example.carrental.dto.payment.PaymentResponseDto;
 import com.example.carrental.enums.PaymentStatus;
@@ -22,6 +23,8 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -55,6 +58,7 @@ public class PaymentControllerIntegrationTest {
     @Nested
     @DisplayName("Create Session Tests")
     class CreateSessionTests {
+
         @Test
         @DisplayName("Should return 201 and URL when authorized")
         @WithMockUser
@@ -76,7 +80,8 @@ public class PaymentControllerIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestDto)))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.sessionUrl").value("https://checkout.stripe.com/test-url"))
+                    .andExpect(jsonPath("$.sessionUrl")
+                            .value("https://checkout.stripe.com/test-url"))
                     .andExpect(jsonPath("$.status").value("PENDING"));
         }
 
@@ -93,6 +98,67 @@ public class PaymentControllerIntegrationTest {
                             .content(objectMapper.writeValueAsString(requestDto)))
                     .andExpect(status().isUnauthorized());
         }
+    }
+
+    @Nested
+    @DisplayName("Issue Fine Tests (Manager Only)")
+    class IssueFineTests {
+
+        @Test
+        @DisplayName("Success: Manager can issue a fine")
+        @WithMockUser(username = "manager", roles = "MANAGER")
+        @SneakyThrows
+        void shouldCreateFineWhenManager() {
+            Long rentalId = 1L;
+            CreateFineDto fineDto = new CreateFineDto(BigDecimal.valueOf(50.00), "DAMAGE");
+
+            PaymentResponseDto mockResponse = new PaymentResponseDto();
+            mockResponse.setStatus(PaymentStatus.PENDING);
+            mockResponse.setType(PaymentType.FINE);
+            mockResponse.setAmount(BigDecimal.valueOf(50.00));
+
+            when(paymentService.createFine(eq(rentalId), any(CreateFineDto.class)))
+                    .thenReturn(mockResponse);
+
+            mockMvc.perform(post("/api/payments/rentals/{id}/fine", rentalId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(fineDto)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.type").value("FINE"))
+                    .andExpect(jsonPath("$.amount").value(50.0));
+        }
+
+        @Test
+        @DisplayName("Fail: Customer cannot issue a fine (403 Forbidden)")
+        @WithMockUser(username = "customer", roles = "CUSTOMER")
+        @SneakyThrows
+        void shouldForbidFineCreationWhenCustomer() {
+            Long rentalId = 1L;
+            CreateFineDto fineDto = new CreateFineDto(BigDecimal.valueOf(50.00), "DAMAGE");
+
+            mockMvc.perform(post("/api/payments/rentals/{id}/fine", rentalId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(fineDto)))
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("Fail: Should return 400 if amount is invalid")
+        @WithMockUser(username = "manager", roles = "MANAGER")
+        @SneakyThrows
+        void shouldReturn400WhenAmountInvalid() {
+            CreateFineDto fineDto = new CreateFineDto(BigDecimal.valueOf(-10.00), "DAMAGE");
+
+            mockMvc.perform(post("/api/payments/rentals/{id}/fine", 1L)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(fineDto)))
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Nested
+    @DisplayName("Callback Tests (Success/Cancel)")
+    class CallbackTests {
 
         @Test
         @DisplayName("Should work WITHOUT Authentication (permitAll)")
@@ -116,10 +182,12 @@ public class PaymentControllerIntegrationTest {
         @Test
         @DisplayName("Cancel should work WITHOUT Authentication")
         @SneakyThrows
-        void cancelShouldWorkWithAuthentication() {
+        void cancelShouldWorkWithoutAuthentication() {
             mockMvc.perform(get("/api/payments/cancel")
                             .param("session_id", "sess_123"))
                     .andExpect(status().isOk());
+
+            verify(paymentService).handlePaymentCancel("sess_123");
         }
     }
 }
