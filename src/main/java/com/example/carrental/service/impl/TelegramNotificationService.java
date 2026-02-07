@@ -1,7 +1,7 @@
 package com.example.carrental.service.impl;
 
 import com.example.carrental.notification.CarRentalBot;
-import com.example.carrental.service.NotificationService;
+import com.example.carrental.service.interfaces.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

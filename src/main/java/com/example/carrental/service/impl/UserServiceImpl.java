@@ -7,7 +7,7 @@ import com.example.carrental.enums.UserRole;
 import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.mapper.user.UserMapper;
 import com.example.carrental.repository.UserRepository;
-import com.example.carrental.service.UserService;
+import com.example.carrental.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;

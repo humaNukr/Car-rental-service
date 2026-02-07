@@ -3,7 +3,7 @@ package com.example.carrental.controller;
 import com.example.carrental.dto.user.UserResponseDto;
 import com.example.carrental.dto.user.UserRoleUpdateDto;
 import com.example.carrental.dto.user.UserUpdateRequestDto;
-import com.example.carrental.service.UserService;
+import com.example.carrental.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;

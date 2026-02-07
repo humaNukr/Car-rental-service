@@ -18,7 +18,7 @@ import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.PaymentRepository;
 import com.example.carrental.repository.RentalRepository;
 import com.example.carrental.repository.UserRepository;
-import com.example.carrental.service.NotificationService;
+import com.example.carrental.service.interfaces.NotificationService;
 import com.example.carrental.util.BaseIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -77,6 +77,92 @@ class RentalControllerIntegrationTest extends BaseIntegrationTest {
         defaultCustomer = createTestUser("customer@email.com", UserRole.CUSTOMER);
         defaultCar = createTestCar("AA0000AA", CarStatus.AVAILABLE);
         defaultToken = loginAndGetToken("customer@email.com");
+    }
+
+    private Rental saveRental(User user, Car car, boolean isReturned) {
+        Rental rental = new Rental();
+        rental.setUser(user);
+        rental.setCar(car);
+        rental.setRentalDate(LocalDate.now().minusDays(2));
+        rental.setReturnDate(LocalDate.now().plusDays(2));
+
+        if (isReturned) {
+            rental.setActualReturnDate(LocalDate.now());
+            car.setStatus(CarStatus.AVAILABLE);
+        } else {
+            rental.setActualReturnDate(null);
+            car.setStatus(CarStatus.RENTED);
+        }
+        carRepository.save(car);
+        return rentalRepository.save(rental);
+    }
+
+    private <T, D> ResponseEntity<T> executeRequest(
+            String url,
+            HttpMethod httpMethod,
+            D dto,
+            String token,
+            Class<T> responseType
+    ) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        HttpEntity<D> request = new HttpEntity<>(dto, headers);
+
+        return restTemplate.exchange(url, httpMethod, request, responseType);
+    }
+
+    private RentalRequestDto createRentalRequest(Long carId, LocalDate start, LocalDate end) {
+        RentalRequestDto dto = new RentalRequestDto();
+        dto.setCarId(carId);
+        dto.setRentalDate(start);
+        dto.setReturnDate(end);
+        return dto;
+    }
+
+    private User createTestUser(String email, UserRole role) {
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode("password"));
+        user.setFirstName("Test");
+        user.setLastName("User");
+        user.setRole(role);
+        return userRepository.save(user);
+    }
+
+    private Rental createTestRental(LocalDate rentalDate, LocalDate returnDate) {
+        Rental rental = new Rental();
+        rental.setUser(defaultCustomer);
+        rental.setCar(defaultCar);
+        rental.setRentalDate(rentalDate);
+        rental.setReturnDate(returnDate);
+        return rental;
+    }
+
+    private Car createTestCar(String plate, CarStatus status) {
+        Car car = new Car();
+        car.setBrand("Toyota");
+        car.setModel("Camry");
+        car.setType(CarType.SEDAN);
+        car.setDailyFee(BigDecimal.TEN);
+        car.setLicensePlate(plate);
+        car.setColor("Black");
+        car.setStatus(status);
+        car.setDeleted(false);
+        return carRepository.save(car);
+    }
+
+    private String loginAndGetToken(String email) {
+        UserLoginRequestDto loginRequest = new UserLoginRequestDto();
+        loginRequest.setEmail(email);
+        loginRequest.setPassword("password");
+
+        ResponseEntity<JwtAuthenticationDto> response = restTemplate.postForEntity(
+                createUrl("/api/auth/login"),
+                loginRequest,
+                JwtAuthenticationDto.class
+        );
+        assertNotNull(response.getBody());
+        return response.getBody().getToken();
     }
 
     @Nested
@@ -432,91 +518,5 @@ class RentalControllerIntegrationTest extends BaseIntegrationTest {
             assertNotNull(errors);
             assertTrue(errors.containsKey("returnDate"));
         }
-    }
-
-    private Rental saveRental(User user, Car car, boolean isReturned) {
-        Rental rental = new Rental();
-        rental.setUser(user);
-        rental.setCar(car);
-        rental.setRentalDate(LocalDate.now().minusDays(2));
-        rental.setReturnDate(LocalDate.now().plusDays(2));
-
-        if (isReturned) {
-            rental.setActualReturnDate(LocalDate.now());
-            car.setStatus(CarStatus.AVAILABLE);
-        } else {
-            rental.setActualReturnDate(null);
-            car.setStatus(CarStatus.RENTED);
-        }
-        carRepository.save(car);
-        return rentalRepository.save(rental);
-    }
-
-    private <T, D> ResponseEntity<T> executeRequest(
-            String url,
-            HttpMethod httpMethod,
-            D dto,
-            String token,
-            Class<T> responseType
-    ) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-        HttpEntity<D> request = new HttpEntity<>(dto, headers);
-
-        return restTemplate.exchange(url, httpMethod, request, responseType);
-    }
-
-    private RentalRequestDto createRentalRequest(Long carId, LocalDate start, LocalDate end) {
-        RentalRequestDto dto = new RentalRequestDto();
-        dto.setCarId(carId);
-        dto.setRentalDate(start);
-        dto.setReturnDate(end);
-        return dto;
-    }
-
-    private User createTestUser(String email, UserRole role) {
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode("password"));
-        user.setFirstName("Test");
-        user.setLastName("User");
-        user.setRole(role);
-        return userRepository.save(user);
-    }
-
-    private Rental createTestRental(LocalDate rentalDate, LocalDate returnDate) {
-        Rental rental = new Rental();
-        rental.setUser(defaultCustomer);
-        rental.setCar(defaultCar);
-        rental.setRentalDate(rentalDate);
-        rental.setReturnDate(returnDate);
-        return rental;
-    }
-
-    private Car createTestCar(String plate, CarStatus status) {
-        Car car = new Car();
-        car.setBrand("Toyota");
-        car.setModel("Camry");
-        car.setType(CarType.SEDAN);
-        car.setDailyFee(BigDecimal.TEN);
-        car.setLicensePlate(plate);
-        car.setColor("Black");
-        car.setStatus(status);
-        car.setDeleted(false);
-        return carRepository.save(car);
-    }
-
-    private String loginAndGetToken(String email) {
-        UserLoginRequestDto loginRequest = new UserLoginRequestDto();
-        loginRequest.setEmail(email);
-        loginRequest.setPassword("password");
-
-        ResponseEntity<JwtAuthenticationDto> response = restTemplate.postForEntity(
-                createUrl("/api/auth/login"),
-                loginRequest,
-                JwtAuthenticationDto.class
-        );
-        assertNotNull(response.getBody());
-        return response.getBody().getToken();
     }
 }

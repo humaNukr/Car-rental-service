@@ -3,7 +3,7 @@ package com.example.carrental.controller;
 import com.example.carrental.dto.payment.CreateFineDto;
 import com.example.carrental.dto.payment.PaymentRequestDto;
 import com.example.carrental.dto.payment.PaymentResponseDto;
-import com.example.carrental.service.PaymentService;
+import com.example.carrental.service.interfaces.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

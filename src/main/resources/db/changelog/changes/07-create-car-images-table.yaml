@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: 07-create-car-images-table
+      author: humaNukr
+      changes:
+        - createTable:
+            tableName: car_images
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: image_url
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_main
+                  type: boolean
+              - column:
+                  name: car_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_car_images_car
+                    references: cars(id)
+                    deleteCascade: true

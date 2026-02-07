@@ -1,4 +1,4 @@
-package com.example.carrental.service;
+package com.example.carrental.service.interfaces;
 
 import com.example.carrental.dto.rental.RentalRequestDto;
 import com.example.carrental.dto.rental.RentalResponseDto;

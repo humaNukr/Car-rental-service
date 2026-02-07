@@ -5,7 +5,7 @@ import com.example.carrental.dto.payment.PaymentRequestDto;
 import com.example.carrental.dto.payment.PaymentResponseDto;
 import com.example.carrental.enums.PaymentStatus;
 import com.example.carrental.enums.PaymentType;
-import com.example.carrental.service.PaymentService;
+import com.example.carrental.service.interfaces.PaymentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;

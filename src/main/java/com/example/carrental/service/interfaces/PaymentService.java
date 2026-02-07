@@ -1,4 +1,4 @@
-package com.example.carrental.service;
+package com.example.carrental.service.interfaces;
 
 import com.example.carrental.dto.payment.CreateFineDto;
 import com.example.carrental.dto.payment.PaymentRequestDto;

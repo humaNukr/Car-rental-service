@@ -39,3 +39,6 @@ out/
 ### logs ###
 logs/
 *.log
+
+### uploads ###
+/uploads/

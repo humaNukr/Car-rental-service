@@ -5,9 +5,10 @@ import com.example.carrental.enums.CarType;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
-public class CarResponseDto {
+public class CarDetailsDto {
     private Long id;
     private String brand;
     private String model;
@@ -16,5 +17,5 @@ public class CarResponseDto {
     private String licensePlate;
     private CarStatus status;
     private BigDecimal dailyFee;
-    private String mainImageUrl;
+    private List<String> imageUrls;
 }

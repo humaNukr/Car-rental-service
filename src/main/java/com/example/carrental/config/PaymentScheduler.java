@@ -1,4 +1,4 @@
-package com.example.carrental.service;
+package com.example.carrental.config;
 
 import com.example.carrental.entity.Payment;
 import com.example.carrental.enums.PaymentStatus;

@@ -14,7 +14,7 @@ import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.mapper.payment.PaymentMapper;
 import com.example.carrental.repository.PaymentRepository;
 import com.example.carrental.repository.RentalRepository;
-import com.example.carrental.service.NotificationService;
+import com.example.carrental.service.interfaces.NotificationService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
@@ -50,18 +50,15 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
 
+    private final PaymentMapper paymentMapper = Mappers.getMapper(PaymentMapper.class);
     @Mock
     private PaymentRepository paymentRepository;
     @Mock
     private RentalRepository rentalRepository;
     @Mock
     private NotificationService notificationService;
-
     @InjectMocks
     private PaymentServiceImpl paymentService;
-
-    private final PaymentMapper paymentMapper = Mappers.getMapper(PaymentMapper.class);
-
     private MockedStatic<Session> sessionMock;
 
     @Captor

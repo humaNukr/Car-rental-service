@@ -17,9 +17,6 @@ import java.util.TimeZone;
 })
 public abstract class BaseIntegrationTest {
 
-    @MockitoBean
-    private TelegramBotsApi telegramBotsApi;
-
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:15")
             .withDatabaseName("car_rental_test")
             .withUsername("test")
@@ -35,6 +32,8 @@ public abstract class BaseIntegrationTest {
 
     @LocalServerPort
     protected int port;
+    @MockitoBean
+    private TelegramBotsApi telegramBotsApi;
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {

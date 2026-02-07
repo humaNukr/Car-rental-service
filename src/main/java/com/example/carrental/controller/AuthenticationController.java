@@ -5,7 +5,7 @@ import com.example.carrental.dto.jwt.RefreshTokenDto;
 import com.example.carrental.dto.user.UserLoginRequestDto;
 import com.example.carrental.dto.user.UserRegistrationRequestDto;
 import com.example.carrental.dto.user.UserResponseDto;
-import com.example.carrental.service.AuthenticationService;
+import com.example.carrental.service.interfaces.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

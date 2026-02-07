@@ -12,7 +12,7 @@ import com.example.carrental.exception.user.UserAlreadyExistsException;
 import com.example.carrental.mapper.user.UserMapper;
 import com.example.carrental.repository.UserRepository;
 import com.example.carrental.security.jwt.JwtUtil;
-import com.example.carrental.service.AuthenticationService;
+import com.example.carrental.service.interfaces.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;

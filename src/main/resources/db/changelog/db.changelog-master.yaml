@@ -11,3 +11,5 @@ databaseChangeLog:
       file: db/changelog/changes/05-add-created-at-to-payments.yaml
   - include:
       file: db/changelog/changes/06-make-payment-session-nullable.yaml
+  - include:
+      file: db/changelog/changes/07-create-car-images-table.yaml
