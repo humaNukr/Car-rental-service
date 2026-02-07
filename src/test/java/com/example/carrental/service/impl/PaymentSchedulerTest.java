@@ -1,9 +1,9 @@
 package com.example.carrental.service.impl;
 
+import com.example.carrental.config.PaymentScheduler;
 import com.example.carrental.entity.Payment;
 import com.example.carrental.enums.PaymentStatus;
 import com.example.carrental.repository.PaymentRepository;
-import com.example.carrental.service.PaymentScheduler;
 import com.stripe.model.checkout.Session;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

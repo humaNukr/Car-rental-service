@@ -3,7 +3,7 @@ package com.example.carrental.controller;
 import com.example.carrental.dto.rental.RentalRequestDto;
 import com.example.carrental.dto.rental.RentalResponseDto;
 import com.example.carrental.dto.rental.RentalUpdateRequestDto;
-import com.example.carrental.service.RentalService;
+import com.example.carrental.service.interfaces.RentalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;

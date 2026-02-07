@@ -9,11 +9,12 @@ import com.example.carrental.exception.car.LicensePlateAlreadyExistsException;
 import com.example.carrental.mapper.car.CarMapper;
 import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.spec.CarSpecificationBuilder;
-import com.example.carrental.service.CarService;
+import com.example.carrental.service.interfaces.CarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,16 +23,18 @@ import java.util.List;
 public class CarServiceImpl implements CarService {
     private final CarRepository carRepository;
     private final CarMapper carMapper;
+    private final CarImageService imageService;
     private final CarSpecificationBuilder carSpecificationBuilder;
 
     @Override
+    @Transactional
     public CarResponseDto save(CarRequestDto dto) {
         if (carRepository.existsByLicensePlate(dto.getLicensePlate())) {
             throw new LicensePlateAlreadyExistsException("Car with this license plate already exists");
         }
 
         Car car = carMapper.toEntity(dto);
-        return carMapper.toDto(carRepository.save(car));
+        return carMapper.toResponseDto(carRepository.save(car));
     }
 
     @Override
@@ -40,7 +43,7 @@ public class CarServiceImpl implements CarService {
 
         return carRepository.findAll(spec, pageable)
                 .stream()
-                .map(carMapper::toDto)
+                .map(carMapper::toResponseDto)
                 .toList();
     }
 
@@ -48,22 +51,25 @@ public class CarServiceImpl implements CarService {
     public CarResponseDto getById(Long id) {
         Car car = carRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
-        return carMapper.toDto(car);
+        return carMapper.toResponseDto(car);
     }
 
     @Override
+    @Transactional
     public CarResponseDto update(Long id, CarRequestDto dto) {
         Car car = carRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
         carMapper.updateCarFromDto(dto, car);
-        return carMapper.toDto(carRepository.save(car));
+        return carMapper.toResponseDto(carRepository.save(car));
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         if (!carRepository.existsById(id)) {
             throw new EntityNotFoundException("Car not found with id: " + id);
         }
+        imageService.deleteFolder(id);
         carRepository.deleteById(id);
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "rental")
 @Data
 public class RentalProperties {
-    private Fine fine = new  Fine();
+    private Fine fine = new Fine();
 
     @Data
     public static class Fine {

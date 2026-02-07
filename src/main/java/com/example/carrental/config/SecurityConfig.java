@@ -66,6 +66,10 @@ public class SecurityConfig {
                                 "/api/payments/cancel"
                         )
                         .permitAll()
+                        .requestMatchers(
+                                "/images/**"
+                        )
+                        .permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(

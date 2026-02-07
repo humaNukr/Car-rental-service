@@ -21,9 +21,14 @@ spring:
     enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.yaml
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+
 jwt:
   secret: ${JWT_SECRET}
-  access-token-expiration-ms: 180000
+  access-token-expiration-ms: 1800000
   refresh-token-expiration-ms: 86400000
 
 stripe:
@@ -32,7 +37,7 @@ stripe:
   cancel-url: http://localhost:8080/api/payments/cancel
 
 scheduler:
-  fixed-delay: 60000
+  fixed-delay: 300000
 
 bot:
   username: "MyCarRentalNotificationBot"
@@ -42,6 +47,13 @@ bot:
 rental:
   fine:
     late-return-multiplier: 1.5
+
+file:
+  base-dir: ./uploads
+  images-upload-dir: ./uploads/images
+  subdirs:
+    car: cars
+
 
 logging:
   level:

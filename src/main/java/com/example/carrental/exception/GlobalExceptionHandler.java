@@ -4,6 +4,7 @@ import com.example.carrental.dto.exception.ErrorResponse;
 import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.exception.car.CarUnavailableException;
 import com.example.carrental.exception.car.LicensePlateAlreadyExistsException;
+import com.example.carrental.exception.file.FileStorageException;
 import com.example.carrental.exception.notification.TelegramBotException;
 import com.example.carrental.exception.rental.RentalAlreadyFinishedException;
 import com.example.carrental.exception.user.UserAlreadyExistsException;
@@ -47,6 +48,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
 
         return buildResponse(HttpStatus.BAD_REQUEST, "Validation failed", errors);
+    }
+
+    @ExceptionHandler(FileStorageException.class)
+    public ResponseEntity<Object> handleFileStorageException(FileStorageException ex) {
+        log.error("File storage error: {}", ex.getMessage(), ex);
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
 
     @ExceptionHandler(TelegramBotException.class)
