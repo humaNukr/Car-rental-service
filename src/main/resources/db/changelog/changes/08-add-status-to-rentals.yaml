@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 08-add-status-to-rentals
+      author: humaNukr
+      changes:
+        - addColumn:
+            tableName: rentals
+            columns:
+              - column:
+                  name: status
+                  type: varchar(255)
+                  defaultValue: PENDING
+                  constraints:
+                    nullable: false

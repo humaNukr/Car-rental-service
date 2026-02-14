@@ -8,6 +8,7 @@ import com.example.carrental.entity.Payment;
 import com.example.carrental.entity.Rental;
 import com.example.carrental.enums.PaymentStatus;
 import com.example.carrental.enums.PaymentType;
+import com.example.carrental.enums.RentalStatus;
 import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.mapper.payment.PaymentMapper;
 import com.example.carrental.repository.PaymentRepository;
@@ -100,6 +101,9 @@ public class PaymentServiceImpl implements PaymentService {
             if ("paid".equals(session.getPaymentStatus())) {
 
                 payment.setStatus(PaymentStatus.PAID);
+                Rental rental = payment.getRental();
+                rental.setStatus(RentalStatus.PAID);
+                rentalRepository.save(rental);
 
                 String message = String.format(
                         "Payment received!\nRental ID: %d\nAmount: %s $\nUser: %s",

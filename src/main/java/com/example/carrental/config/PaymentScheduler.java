@@ -2,11 +2,13 @@ package com.example.carrental.config;
 
 import com.example.carrental.entity.Payment;
 import com.example.carrental.enums.PaymentStatus;
+import com.example.carrental.event.PaymentExpiredEvent;
 import com.example.carrental.repository.PaymentRepository;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ import java.util.List;
 public class PaymentScheduler {
 
     private final PaymentRepository paymentRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Scheduled(fixedDelayString = "${scheduler.fixed-delay}")
     @Transactional
@@ -48,6 +51,10 @@ public class PaymentScheduler {
 
             payment.setStatus(PaymentStatus.CANCELED);
             payment.setDeleted(true);
+
+            if (payment.getRental() != null) {
+                eventPublisher.publishEvent(new PaymentExpiredEvent(payment.getRental().getId()));
+            }
         }
 
         paymentRepository.saveAll(expiredPayments);

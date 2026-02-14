@@ -13,6 +13,7 @@ import com.example.carrental.entity.User;
 import com.example.carrental.enums.CarStatus;
 import com.example.carrental.enums.CarType;
 import com.example.carrental.enums.PaymentType;
+import com.example.carrental.enums.RentalStatus;
 import com.example.carrental.enums.UserRole;
 import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.PaymentRepository;
@@ -89,9 +90,11 @@ class RentalControllerIntegrationTest extends BaseIntegrationTest {
         if (isReturned) {
             rental.setActualReturnDate(LocalDate.now());
             car.setStatus(CarStatus.AVAILABLE);
+            rental.setStatus(RentalStatus.COMPLETED);
         } else {
             rental.setActualReturnDate(null);
             car.setStatus(CarStatus.RENTED);
+            rental.setStatus(RentalStatus.PAID);
         }
         carRepository.save(car);
         return rentalRepository.save(rental);
@@ -135,6 +138,7 @@ class RentalControllerIntegrationTest extends BaseIntegrationTest {
         rental.setCar(defaultCar);
         rental.setRentalDate(rentalDate);
         rental.setReturnDate(returnDate);
+        rental.setStatus(RentalStatus.PAID);
         return rental;
     }
 

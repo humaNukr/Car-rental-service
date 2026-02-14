@@ -34,11 +34,13 @@ public interface RentalMapper {
     @Mapping(target = "returnDate", source = "requestDto.returnDate")
     @Mapping(target = "car", source = "car")
     @Mapping(target = "user", source = "user")
+    @Mapping(target = "status", ignore = true)
     Rental toEntity(RentalRequestDto requestDto, Car car, User user);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "car", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "actualReturnDate", ignore = true)
+    @Mapping(target = "status", ignore = true)
     void updateRentalFromDto(RentalUpdateRequestDto dto, @MappingTarget Rental rental);
 }
