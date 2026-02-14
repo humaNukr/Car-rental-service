@@ -9,6 +9,7 @@ import com.example.carrental.entity.Car;
 import com.example.carrental.entity.Rental;
 import com.example.carrental.entity.User;
 import com.example.carrental.enums.CarStatus;
+import com.example.carrental.enums.RentalStatus;
 import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.exception.car.CarUnavailableException;
 import com.example.carrental.exception.rental.RentalAlreadyFinishedException;
@@ -55,6 +56,7 @@ public class RentalServiceImpl implements RentalService {
         }
 
         Rental rental = rentalMapper.toEntity(requestDto, car, user);
+        rental.setStatus(RentalStatus.PENDING);
 
         car.setStatus(CarStatus.RENTED);
         carRepository.save(car);
@@ -99,6 +101,7 @@ public class RentalServiceImpl implements RentalService {
         }
 
         rental.setActualReturnDate(LocalDate.now());
+        rental.setStatus(RentalStatus.COMPLETED);
 
         Car car = rental.getCar();
         car.setStatus(CarStatus.AVAILABLE);

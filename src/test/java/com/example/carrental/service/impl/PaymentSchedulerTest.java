@@ -2,7 +2,9 @@ package com.example.carrental.service.impl;
 
 import com.example.carrental.config.PaymentScheduler;
 import com.example.carrental.entity.Payment;
+import com.example.carrental.entity.Rental;
 import com.example.carrental.enums.PaymentStatus;
+import com.example.carrental.event.PaymentExpiredEvent;
 import com.example.carrental.repository.PaymentRepository;
 import com.stripe.model.checkout.Session;
 import org.junit.jupiter.api.AfterEach;
@@ -15,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,6 +37,9 @@ class PaymentSchedulerTest {
     @Mock
     private PaymentRepository paymentRepository;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     @InjectMocks
     private PaymentScheduler paymentScheduler;
 
@@ -50,12 +56,16 @@ class PaymentSchedulerTest {
     }
 
     @Test
-    @DisplayName("Check Pending: Should expire old payments")
+    @DisplayName("Check Pending: Should expire old payments and publish event")
     void shouldExpireOldPayments() throws Exception {
+        Rental rental = new Rental();
+        rental.setId(100L);
+
         Payment oldPayment = new Payment();
         oldPayment.setId(1L);
         oldPayment.setSessionId("sess_old");
         oldPayment.setStatus(PaymentStatus.PENDING);
+        oldPayment.setRental(rental);
 
         when(paymentRepository.findAllByStatusAndCreatedAtBefore(eq(PaymentStatus.PENDING), any(LocalDateTime.class)))
                 .thenReturn(List.of(oldPayment));
@@ -70,7 +80,8 @@ class PaymentSchedulerTest {
         assertTrue(oldPayment.isDeleted());
 
         verify(stripeSession).expire();
-
         verify(paymentRepository).saveAll(anyList());
+
+        verify(eventPublisher).publishEvent(any(PaymentExpiredEvent.class));
     }
 }
