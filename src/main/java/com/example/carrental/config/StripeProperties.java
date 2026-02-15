@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class StripeProperties {
     private String apiKey;
+    private String webhookSecret;
     private String successUrl;
     private String cancelUrl;
 }

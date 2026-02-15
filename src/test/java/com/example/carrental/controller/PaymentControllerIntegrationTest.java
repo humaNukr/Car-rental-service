@@ -5,6 +5,7 @@ import com.example.carrental.dto.payment.PaymentRequestDto;
 import com.example.carrental.dto.payment.PaymentResponseDto;
 import com.example.carrental.enums.PaymentStatus;
 import com.example.carrental.enums.PaymentType;
+import com.example.carrental.service.impl.StripeWebhookService;
 import com.example.carrental.service.interfaces.PaymentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -18,12 +19,14 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 
 import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -51,6 +54,9 @@ public class PaymentControllerIntegrationTest {
 
     @MockitoBean
     private TelegramBotsApi telegramBotsApi;
+
+    @MockitoBean
+    private StripeWebhookService stripeWebhookService;
 
     @MockitoBean
     private PaymentService paymentService;
@@ -157,7 +163,7 @@ public class PaymentControllerIntegrationTest {
     }
 
     @Nested
-    @DisplayName("Callback Tests (Success/Cancel)")
+    @DisplayName("Callback Tests (Success/Cancel/Webhook)")
     class CallbackTests {
 
         @Test
@@ -188,6 +194,24 @@ public class PaymentControllerIntegrationTest {
                     .andExpect(status().isOk());
 
             verify(paymentService).handlePaymentCancel("sess_123");
+        }
+
+        @Test
+        @DisplayName("Webhook should return 200 OK WITHOUT Authentication")
+        @SneakyThrows
+        void webhookShouldReturn200() {
+            String payload = "{\"type\":\"checkout.session.completed\"}";
+            String fakeSignature = "t=12345,v1=fake_signature_hash";
+
+            doNothing().when(stripeWebhookService).processWebhook(payload, fakeSignature);
+
+            mockMvc.perform(post("/api/payments/webhook")
+                            .header("Stripe-Signature", fakeSignature)
+                            .content(payload)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(MockMvcResultMatchers.content()
+                            .string("Webhook processed successfully"));
         }
     }
 }

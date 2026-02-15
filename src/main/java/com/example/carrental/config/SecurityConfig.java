@@ -63,7 +63,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(
                                 "/api/payments/success",
-                                "/api/payments/cancel"
+                                "/api/payments/cancel",
+                                "/api/payments/webhook"
                         )
                         .permitAll()
                         .requestMatchers(
