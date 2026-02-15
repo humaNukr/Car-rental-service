@@ -33,6 +33,6 @@ public class UserController {
     @PatchMapping("/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponseDto updateUserRole(@PathVariable Long id, @RequestBody UserRoleUpdateDto requestDto) {
-        return userService.updateRole(id, requestDto.getRole());
+        return userService.updateRole(id, requestDto);
     }
 }

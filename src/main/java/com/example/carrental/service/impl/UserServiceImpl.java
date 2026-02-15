@@ -1,6 +1,7 @@
 package com.example.carrental.service.impl;
 
 import com.example.carrental.dto.user.UserResponseDto;
+import com.example.carrental.dto.user.UserRoleUpdateDto;
 import com.example.carrental.dto.user.UserUpdateRequestDto;
 import com.example.carrental.entity.User;
 import com.example.carrental.enums.UserRole;
@@ -25,12 +26,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDto updateRole(Long id, UserRole role) {
-        User user = userRepository.findById(id)
+    public UserResponseDto updateRole(Long id, UserRoleUpdateDto requestDto) {
+        User targetUser = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
-        user.setRole(role);
-        User savedUser = userRepository.save(user);
-        return mapper.toDto(savedUser);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+
+        if (targetUser.getEmail().equals(currentEmail)) {
+            throw new RuntimeException("Action denied: You cannot change your own role.");
+        }
+
+        targetUser.setRole(requestDto.getRole());
+        return mapper.toDto(userRepository.save(targetUser));
     }
 
     @Override
