@@ -1,6 +1,6 @@
 package com.example.carrental.service.impl;
 
-import com.example.carrental.config.RentalProperties;
+import com.example.carrental.properties.RentalProperties;
 import com.example.carrental.dto.payment.CreateFineDto;
 import com.example.carrental.dto.rental.RentalRequestDto;
 import com.example.carrental.dto.rental.RentalResponseDto;
@@ -10,6 +10,7 @@ import com.example.carrental.entity.Rental;
 import com.example.carrental.entity.User;
 import com.example.carrental.enums.CarStatus;
 import com.example.carrental.enums.RentalStatus;
+import com.example.carrental.event.RentalCreatedEvent;
 import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.exception.car.CarUnavailableException;
 import com.example.carrental.exception.rental.RentalAlreadyFinishedException;
@@ -17,10 +18,10 @@ import com.example.carrental.mapper.rental.RentalMapper;
 import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.RentalRepository;
 import com.example.carrental.repository.UserRepository;
-import com.example.carrental.service.interfaces.NotificationService;
 import com.example.carrental.service.interfaces.PaymentService;
 import com.example.carrental.service.interfaces.RentalService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,7 +40,7 @@ public class RentalServiceImpl implements RentalService {
     private final CarRepository carRepository;
     private final UserRepository userRepository;
     private final RentalMapper rentalMapper;
-    private final NotificationService notificationService;
+    private final ApplicationEventPublisher eventPublisher;
     private final RentalProperties rentalProperties;
     private final PaymentService paymentService;
 
@@ -61,9 +62,9 @@ public class RentalServiceImpl implements RentalService {
         car.setStatus(CarStatus.RENTED);
         carRepository.save(car);
 
-        notificationService.sendNotification("New Rental Created!\nCar ID: " + rental.getCar().getId());
-
-        return rentalMapper.toDto(rentalRepository.save(rental));
+        Rental savedRental = rentalRepository.save(rental);
+        eventPublisher.publishEvent(new RentalCreatedEvent(savedRental.getId()));
+        return rentalMapper.toDto(savedRental);
     }
 
     @Override
@@ -82,6 +83,7 @@ public class RentalServiceImpl implements RentalService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<RentalResponseDto> getMyRentals(Pageable pageable) {
         User user = getCurrentUser();
 
@@ -128,6 +130,24 @@ public class RentalServiceImpl implements RentalService {
         return rentalRepository.findAllByActualReturnDateIsNull(pageable).stream()
                 .map(rentalMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RentalResponseDto getRentalById(Long id) {
+        Rental rental =  rentalRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Rental not found with id: " + id));
+        return rentalMapper.toDto(rental);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RentalResponseDto getMyRentalById(Long id) {
+        User currentUser = getCurrentUser();
+
+        Rental rental = rentalRepository.findByIdAndUserId(id, currentUser.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Rental not found or access denied"));
+        return rentalMapper.toDto(rental);
     }
 
     private User getCurrentUser() {

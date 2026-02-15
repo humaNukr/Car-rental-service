@@ -17,4 +17,8 @@ public interface RentalService {
     RentalResponseDto returnCar(Long rentalId);
 
     List<RentalResponseDto> getAllActive(Pageable pageable);
+
+    RentalResponseDto getRentalById(Long id);
+
+    RentalResponseDto getMyRentalById(Long id);
 }

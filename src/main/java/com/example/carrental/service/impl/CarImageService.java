@@ -1,6 +1,6 @@
 package com.example.carrental.service.impl;
 
-import com.example.carrental.config.FileProperties;
+import com.example.carrental.properties.FileProperties;
 import com.example.carrental.entity.Car;
 import com.example.carrental.entity.CarImage;
 import com.example.carrental.exception.base.EntityNotFoundException;

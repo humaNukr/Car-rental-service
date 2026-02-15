@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RentalRepository extends JpaRepository<Rental, Long> {
 
@@ -14,4 +15,6 @@ public interface RentalRepository extends JpaRepository<Rental, Long> {
 
     @EntityGraph(attributePaths = {"car", "user"})
     List<Rental> findAllByActualReturnDateIsNull(Pageable pageable);
+
+    Optional<Rental> findByIdAndUserId(Long id, Long userId);
 }

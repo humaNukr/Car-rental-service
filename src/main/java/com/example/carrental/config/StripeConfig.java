@@ -1,5 +1,6 @@
 package com.example.carrental.config;
 
+import com.example.carrental.properties.StripeProperties;
 import com.stripe.Stripe;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;

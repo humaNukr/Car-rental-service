@@ -1,6 +1,5 @@
 package com.example.carrental.service.impl;
 
-import com.example.carrental.config.StripeProperties;
 import com.example.carrental.dto.payment.CreateFineDto;
 import com.example.carrental.dto.payment.PaymentRequestDto;
 import com.example.carrental.dto.payment.PaymentResponseDto;
@@ -12,9 +11,9 @@ import com.example.carrental.enums.PaymentStatus;
 import com.example.carrental.enums.PaymentType;
 import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.mapper.payment.PaymentMapper;
+import com.example.carrental.properties.StripeProperties;
 import com.example.carrental.repository.PaymentRepository;
 import com.example.carrental.repository.RentalRepository;
-import com.example.carrental.service.interfaces.NotificationService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
@@ -32,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
@@ -56,7 +56,7 @@ class PaymentServiceTest {
     @Mock
     private RentalRepository rentalRepository;
     @Mock
-    private NotificationService notificationService;
+    private ApplicationEventPublisher eventPublisher;
     @InjectMocks
     private PaymentServiceImpl paymentService;
     private MockedStatic<Session> sessionMock;
@@ -246,6 +246,7 @@ class PaymentServiceTest {
             rental.setUser(user);
 
             Payment payment = new Payment();
+            payment.setId(55L);
             payment.setStatus(PaymentStatus.PENDING);
             payment.setAmount(BigDecimal.valueOf(100));
             payment.setRental(rental);
@@ -264,7 +265,7 @@ class PaymentServiceTest {
             assertEquals(PaymentStatus.PAID, result.getStatus());
             assertEquals(BigDecimal.valueOf(100), result.getAmount());
 
-            verify(notificationService).sendNotification(any(String.class));
+            verify(eventPublisher).publishEvent(any(com.example.carrental.event.PaymentReceivedEvent.class));
         }
 
         @Test

@@ -1,6 +1,6 @@
 package com.example.carrental.service.impl;
 
-import com.example.carrental.config.StripeProperties;
+import com.example.carrental.properties.StripeProperties;
 import com.example.carrental.dto.payment.CreateFineDto;
 import com.example.carrental.dto.payment.PaymentRequestDto;
 import com.example.carrental.dto.payment.PaymentResponseDto;
@@ -9,21 +9,18 @@ import com.example.carrental.entity.Rental;
 import com.example.carrental.enums.PaymentStatus;
 import com.example.carrental.enums.PaymentType;
 import com.example.carrental.enums.RentalStatus;
+import com.example.carrental.event.PaymentReceivedEvent;
 import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.mapper.payment.PaymentMapper;
 import com.example.carrental.repository.PaymentRepository;
 import com.example.carrental.repository.RentalRepository;
-import com.example.carrental.service.interfaces.NotificationService;
 import com.example.carrental.service.interfaces.PaymentService;
-import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
-import com.stripe.model.Event;
-import com.stripe.model.EventDataObjectDeserializer;
 import com.stripe.model.checkout.Session;
-import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +39,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final StripeProperties stripeProperties;
 
-    private final NotificationService notificationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -121,9 +118,11 @@ public class PaymentServiceImpl implements PaymentService {
                         payment.getAmount(),
                         payment.getRental().getUser().getEmail()
                 );
-                notificationService.sendNotification(message);
 
-                return mapper.toDto(paymentRepository.save(payment));
+                Payment savedPayment = paymentRepository.save(payment);
+                eventPublisher.publishEvent(new PaymentReceivedEvent(savedPayment.getId()));
+
+                return mapper.toDto(savedPayment);
             } else {
                 throw new RuntimeException("Payment is not completed yet");
             }

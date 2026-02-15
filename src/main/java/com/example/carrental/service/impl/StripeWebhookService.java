@@ -1,6 +1,6 @@
 package com.example.carrental.service.impl;
 
-import com.example.carrental.config.StripeProperties;
+import com.example.carrental.properties.StripeProperties;
 import com.example.carrental.service.interfaces.PaymentService;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;

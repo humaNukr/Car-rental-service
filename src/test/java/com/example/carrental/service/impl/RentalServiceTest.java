@@ -1,6 +1,6 @@
 package com.example.carrental.service.impl;
 
-import com.example.carrental.config.RentalProperties;
+import com.example.carrental.properties.RentalProperties;
 import com.example.carrental.dto.payment.CreateFineDto;
 import com.example.carrental.dto.rental.RentalRequestDto;
 import com.example.carrental.dto.rental.RentalResponseDto;
@@ -9,13 +9,14 @@ import com.example.carrental.entity.Car;
 import com.example.carrental.entity.Rental;
 import com.example.carrental.entity.User;
 import com.example.carrental.enums.CarStatus;
+import com.example.carrental.event.RentalCreatedEvent;
+import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.exception.car.CarUnavailableException;
 import com.example.carrental.exception.rental.RentalAlreadyFinishedException;
 import com.example.carrental.mapper.rental.RentalMapper;
 import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.RentalRepository;
 import com.example.carrental.repository.UserRepository;
-import com.example.carrental.service.interfaces.NotificationService;
 import com.example.carrental.service.interfaces.PaymentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +28,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -58,7 +61,7 @@ class RentalServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private NotificationService notificationService;
+    private ApplicationEventPublisher eventPublisher;
     @Mock
     private SecurityContext securityContext;
     @Mock
@@ -85,7 +88,7 @@ class RentalServiceTest {
                 carRepository,
                 userRepository,
                 rentalMapper,
-                notificationService,
+                eventPublisher,
                 rentalProperties,
                 paymentService
         );
@@ -112,7 +115,7 @@ class RentalServiceTest {
     class CreateRental {
 
         @Test
-        @DisplayName("Success: Should calculate fields, save rental and update car status")
+        @DisplayName("Success: Should calculate fields, save rental, update car status and publish event")
         void shouldCreateRentalSuccessfully() {
             mockSecurityContext(USER_EMAIL);
 
@@ -123,7 +126,11 @@ class RentalServiceTest {
 
             when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(defaultUser));
             when(carRepository.findById(defaultCar.getId())).thenReturn(Optional.of(defaultCar));
-            when(rentalRepository.save(any(Rental.class))).thenAnswer(i -> i.getArgument(0));
+            when(rentalRepository.save(any(Rental.class))).thenAnswer(i -> {
+                Rental r = i.getArgument(0);
+                r.setId(99L);
+                return r;
+            });
 
             RentalResponseDto result = rentalService.createRental(request);
 
@@ -137,7 +144,7 @@ class RentalServiceTest {
             assertNull(savedRental.getActualReturnDate());
             assertEquals(defaultUser, savedRental.getUser());
 
-            verify(notificationService).sendNotification(any(String.class));
+            verify(eventPublisher).publishEvent(any(RentalCreatedEvent.class));
         }
 
         @Test
@@ -154,6 +161,7 @@ class RentalServiceTest {
 
             assertThrows(CarUnavailableException.class, () -> rentalService.createRental(request));
             verify(rentalRepository, never()).save(any());
+            verify(eventPublisher, never()).publishEvent(any());
         }
     }
 
@@ -267,6 +275,59 @@ class RentalServiceTest {
 
             assertThrows(RentalAlreadyFinishedException.class,
                     () -> rentalService.updateRental(rentalId, updateDto));
+        }
+    }
+
+    @Nested
+    @DisplayName("Get Rental")
+    class GetRental {
+
+        @Test
+        @DisplayName("getMyRentalById: Should return rental when user is the owner")
+        void getMyRentalById_ShouldReturnRental_WhenUserIsOwner() {
+            Long rentalId = 1L;
+            Long userId = 100L;
+
+            User currentUser = new User();
+            currentUser.setId(userId);
+            currentUser.setEmail(USER_EMAIL);
+
+            Rental rental = new Rental();
+            rental.setId(rentalId);
+            rental.setUser(currentUser);
+
+            mockSecurityContext(USER_EMAIL);
+            when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(currentUser));
+
+            when(rentalRepository.findByIdAndUserId(rentalId, userId)).thenReturn(Optional.of(rental));
+
+            RentalResponseDto actualDto = rentalService.getMyRentalById(rentalId);
+
+            assertNotNull(actualDto);
+            assertEquals(rentalId, actualDto.getId());
+            verify(rentalRepository).findByIdAndUserId(rentalId, userId);
+        }
+
+        @Test
+        @DisplayName("getMyRentalById: Should throw EntityNotFoundException when rental belongs to someone else")
+        void getMyRentalById_ShouldThrowException_WhenRentalBelongsToOtherUser() {
+            Long rentalId = 1L;
+            Long currentUserId = 100L;
+
+            User currentUser = new User();
+            currentUser.setId(currentUserId);
+            currentUser.setEmail(USER_EMAIL);
+
+            mockSecurityContext(USER_EMAIL);
+            when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(currentUser));
+
+            when(rentalRepository.findByIdAndUserId(rentalId, currentUserId)).thenReturn(Optional.empty());
+
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                    () -> rentalService.getMyRentalById(rentalId));
+
+            assertTrue(exception.getMessage().contains("Rental not found or access denied"));
+            verify(rentalRepository).findByIdAndUserId(rentalId, currentUserId);
         }
     }
 }

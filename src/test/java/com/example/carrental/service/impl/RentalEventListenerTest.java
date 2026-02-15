@@ -5,6 +5,7 @@ import com.example.carrental.entity.Rental;
 import com.example.carrental.enums.CarStatus;
 import com.example.carrental.enums.RentalStatus;
 import com.example.carrental.event.PaymentExpiredEvent;
+import com.example.carrental.listener.RentalEventListener;
 import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.RentalRepository;
 import org.junit.jupiter.api.DisplayName;
