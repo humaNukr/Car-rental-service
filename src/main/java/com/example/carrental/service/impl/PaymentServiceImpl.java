@@ -15,8 +15,12 @@ import com.example.carrental.repository.PaymentRepository;
 import com.example.carrental.repository.RentalRepository;
 import com.example.carrental.service.interfaces.NotificationService;
 import com.example.carrental.service.interfaces.PaymentService;
+import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Event;
+import com.stripe.model.EventDataObjectDeserializer;
 import com.stripe.model.checkout.Session;
+import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -95,6 +99,12 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentResponseDto handlePaymentSuccess(String sessionId) {
         Payment payment = paymentRepository.findBySessionId(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("Payment not found for session: " + sessionId));
+
+        if (payment.getStatus() != PaymentStatus.PENDING) {
+            log.info("Payment for session {} is already processed. Skipping.", sessionId);
+            return mapper.toDto(payment);
+        }
+
         try {
             Session session = Session.retrieve(sessionId);
 
@@ -135,6 +145,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public PaymentResponseDto createFine(Long rentalId, CreateFineDto fineDto) {
         Rental rental = rentalRepository.findById(rentalId)
                 .orElseThrow(() -> new EntityNotFoundException("Rental not found"));
