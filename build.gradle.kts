@@ -37,6 +37,8 @@ dependencies {
     implementation("com.stripe:stripe-java:24.15.0")
     implementation("org.telegram:telegrambots-spring-boot-starter:6.9.7.1")
     implementation("org.springframework.boot:spring-boot-starter-aop:3.5.10")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
     compileOnly("org.projectlombok:lombok:1.18.32")
     runtimeOnly("org.postgresql:postgresql")

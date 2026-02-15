@@ -19,7 +19,7 @@ import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.PaymentRepository;
 import com.example.carrental.repository.RentalRepository;
 import com.example.carrental.repository.UserRepository;
-import com.example.carrental.service.interfaces.NotificationService;
+import com.example.carrental.service.interfaces.TelegramNotificationService;
 import com.example.carrental.util.BaseIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,7 +62,7 @@ class RentalControllerIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @MockitoBean
-    private NotificationService notificationService;
+    private TelegramNotificationService telegramService;
 
     private User defaultCustomer;
     private Car defaultCar;

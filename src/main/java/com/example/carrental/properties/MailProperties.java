@@ -1,15 +1,12 @@
-package com.example.carrental.config;
+package com.example.carrental.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "bot")
+@ConfigurationProperties(prefix = "spring.mail")
 @Data
-public class BotProperties {
+public class MailProperties {
     private String username;
-    private String token;
-    private Long adminChatId;
 }
-

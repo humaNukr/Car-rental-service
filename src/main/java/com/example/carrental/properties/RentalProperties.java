@@ -1,4 +1,4 @@
-package com.example.carrental.config;
+package com.example.carrental.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

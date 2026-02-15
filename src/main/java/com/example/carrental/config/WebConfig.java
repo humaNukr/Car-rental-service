@@ -1,5 +1,6 @@
 package com.example.carrental.config;
 
+import com.example.carrental.properties.FileProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;

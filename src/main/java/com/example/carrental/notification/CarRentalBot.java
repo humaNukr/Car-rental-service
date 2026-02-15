@@ -1,6 +1,6 @@
 package com.example.carrental.notification;
 
-import com.example.carrental.config.BotProperties;
+import com.example.carrental.properties.BotProperties;
 import com.example.carrental.exception.notification.TelegramBotException;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;

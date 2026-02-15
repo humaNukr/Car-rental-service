@@ -1,5 +1,5 @@
 package com.example.carrental.service.interfaces;
 
-public interface NotificationService {
+public interface TelegramNotificationService {
     void sendNotification(String message);
 }

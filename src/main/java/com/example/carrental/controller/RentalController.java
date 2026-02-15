@@ -4,6 +4,7 @@ import com.example.carrental.dto.rental.RentalRequestDto;
 import com.example.carrental.dto.rental.RentalResponseDto;
 import com.example.carrental.dto.rental.RentalUpdateRequestDto;
 import com.example.carrental.service.interfaces.RentalService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -52,6 +53,18 @@ public class RentalController {
     @PreAuthorize("hasRole('MANAGER')")
     public List<RentalResponseDto> getAllActive(Pageable pageable) {
         return rentalService.getAllActive(pageable);
+    }
+
+    @Operation(summary = "Get any rental by ID (Manager only)")
+    @GetMapping("/{id}")
+    public RentalResponseDto getRentalById(@PathVariable Long id) {
+        return rentalService.getRentalById(id);
+    }
+
+    @Operation(summary = "Get my specific rental details by ID")
+    @GetMapping("/my/{id}")
+    public RentalResponseDto getMyRentalById(@PathVariable Long id) {
+        return rentalService.getMyRentalById(id);
     }
 
 }
