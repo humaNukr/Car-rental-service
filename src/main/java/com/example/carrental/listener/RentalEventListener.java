@@ -24,8 +24,8 @@ public class RentalEventListener {
     @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handlePaymentExpired(PaymentExpiredEvent event) {
-        log.info("Received PaymentExpiredEvent for rental ID: {}", event.getRentalId());
-        rentalRepository.findById(event.getRentalId()).ifPresent(rental -> {
+        log.info("Received PaymentExpiredEvent for rental ID: {}", event.rentalId());
+        rentalRepository.findById(event.rentalId()).ifPresent(rental -> {
             if (rental.getStatus() == RentalStatus.PENDING) {
 
                 rental.setStatus(RentalStatus.CANCELED);
