@@ -3,6 +3,8 @@ package com.example.carrental.service.interfaces;
 import com.example.carrental.dto.car.CarRequestDto;
 import com.example.carrental.dto.car.CarResponseDto;
 import com.example.carrental.dto.car.CarSearchParameters;
+import com.example.carrental.entity.Car;
+import com.example.carrental.enums.CarStatus;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -17,4 +19,8 @@ public interface CarService {
     CarResponseDto update(Long id, CarRequestDto dto);
 
     void delete(Long id);
+
+    Car getAvailableCarForRental(Long carId);
+
+    void changeStatus(Long id, CarStatus status);
 }

@@ -4,7 +4,9 @@ import com.example.carrental.dto.car.CarRequestDto;
 import com.example.carrental.dto.car.CarResponseDto;
 import com.example.carrental.dto.car.CarSearchParameters;
 import com.example.carrental.entity.Car;
+import com.example.carrental.enums.CarStatus;
 import com.example.carrental.exception.base.EntityNotFoundException;
+import com.example.carrental.exception.car.CarUnavailableException;
 import com.example.carrental.exception.car.LicensePlateAlreadyExistsException;
 import com.example.carrental.mapper.car.CarMapper;
 import com.example.carrental.repository.CarRepository;
@@ -49,16 +51,14 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public CarResponseDto getById(Long id) {
-        Car car = carRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
+        Car car = getCarByIdIfExists(id);
         return carMapper.toResponseDto(car);
     }
 
     @Override
     @Transactional
     public CarResponseDto update(Long id, CarRequestDto dto) {
-        Car car = carRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
+        Car car = getCarByIdIfExists(id);
         carMapper.updateCarFromDto(dto, car);
         return carMapper.toResponseDto(carRepository.save(car));
     }
@@ -71,5 +71,28 @@ public class CarServiceImpl implements CarService {
         }
         imageService.deleteFolder(id);
         carRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Car getAvailableCarForRental(Long id) {
+        Car car = getCarByIdIfExists(id);
+
+        if (car.getStatus() != CarStatus.AVAILABLE) {
+            throw new CarUnavailableException("Car is not available for rental");
+        }
+        return car;
+    }
+
+    @Override
+    @Transactional
+    public void changeStatus(Long id, CarStatus status) {
+        Car car = getCarByIdIfExists(id);
+        car.setStatus(status);
+    }
+
+    private Car getCarByIdIfExists(Long id) {
+        return  carRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
     }
 }

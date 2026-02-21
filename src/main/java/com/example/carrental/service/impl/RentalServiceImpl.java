@@ -1,7 +1,5 @@
 package com.example.carrental.service.impl;
 
-import com.example.carrental.properties.RentalProperties;
-import com.example.carrental.dto.payment.CreateFineDto;
 import com.example.carrental.dto.rental.RentalRequestDto;
 import com.example.carrental.dto.rental.RentalResponseDto;
 import com.example.carrental.dto.rental.RentalUpdateRequestDto;
@@ -11,24 +9,20 @@ import com.example.carrental.entity.User;
 import com.example.carrental.enums.CarStatus;
 import com.example.carrental.enums.RentalStatus;
 import com.example.carrental.event.RentalCreatedEvent;
+import com.example.carrental.event.RentalReturnedLateEvent;
 import com.example.carrental.exception.base.EntityNotFoundException;
-import com.example.carrental.exception.car.CarUnavailableException;
 import com.example.carrental.exception.rental.RentalAlreadyFinishedException;
 import com.example.carrental.mapper.rental.RentalMapper;
-import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.RentalRepository;
-import com.example.carrental.repository.UserRepository;
-import com.example.carrental.service.interfaces.PaymentService;
+import com.example.carrental.security.SecurityFacade;
+import com.example.carrental.service.interfaces.CarService;
 import com.example.carrental.service.interfaces.RentalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -37,32 +31,24 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RentalServiceImpl implements RentalService {
     private final RentalRepository rentalRepository;
-    private final CarRepository carRepository;
-    private final UserRepository userRepository;
     private final RentalMapper rentalMapper;
     private final ApplicationEventPublisher eventPublisher;
-    private final RentalProperties rentalProperties;
-    private final PaymentService paymentService;
+    private final SecurityFacade securityFacade;
+    private final CarService carService;
 
     @Override
     @Transactional
     public RentalResponseDto createRental(RentalRequestDto requestDto) {
-        User user = getCurrentUser();
+        User user = securityFacade.getCurrentUser();
 
-        Car car = carRepository.findById(requestDto.getCarId())
-                .orElseThrow(() -> new EntityNotFoundException("Car not found"));
-
-        if (car.getStatus() != CarStatus.AVAILABLE) {
-            throw new CarUnavailableException("Car is not available for rental");
-        }
+        Car car = carService.getAvailableCarForRental(requestDto.getCarId());
 
         Rental rental = rentalMapper.toEntity(requestDto, car, user);
         rental.setStatus(RentalStatus.PENDING);
-
-        car.setStatus(CarStatus.RENTED);
-        carRepository.save(car);
-
         Rental savedRental = rentalRepository.save(rental);
+
+        carService.changeStatus(car.getId(), CarStatus.RENTED);
+
         eventPublisher.publishEvent(new RentalCreatedEvent(savedRental.getId()));
         return rentalMapper.toDto(savedRental);
     }
@@ -79,13 +65,13 @@ public class RentalServiceImpl implements RentalService {
 
         rentalMapper.updateRentalFromDto(requestDto, rental);
 
-        return rentalMapper.toDto(rentalRepository.save(rental));
+        return rentalMapper.toDto(rental);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<RentalResponseDto> getMyRentals(Pageable pageable) {
-        User user = getCurrentUser();
+        User user = securityFacade.getCurrentUser();
 
         return rentalRepository.findAllByUserId(user.getId(), pageable).stream()
                 .map(rentalMapper::toDto)
@@ -105,24 +91,20 @@ public class RentalServiceImpl implements RentalService {
         rental.setActualReturnDate(LocalDate.now());
         rental.setStatus(RentalStatus.COMPLETED);
 
-        Car car = rental.getCar();
-        car.setStatus(CarStatus.AVAILABLE);
-        carRepository.save(car);
+        carService.changeStatus(rental.getCar().getId(), CarStatus.AVAILABLE);
 
         if (rental.getActualReturnDate().isAfter(rental.getReturnDate())) {
             long lateDays = ChronoUnit.DAYS.between(rental.getReturnDate(), rental.getActualReturnDate());
             if (lateDays > 0) {
-                BigDecimal dailyFee = rental.getCar().getDailyFee();
-                BigDecimal multiplier = BigDecimal.valueOf(rentalProperties.getFine().getLateReturnMultiplier());
-                BigDecimal fineAmount = dailyFee.multiply(BigDecimal.valueOf(lateDays)).multiply(multiplier);
-
-                CreateFineDto autoFine = new CreateFineDto(fineAmount, "LATE_RETURN");
-                paymentService.createFine(rental.getId(), autoFine);
+                eventPublisher.publishEvent(new RentalReturnedLateEvent(
+                        rental.getId(),
+                        lateDays,
+                        rental.getCar().getDailyFee()
+                ));
             }
         }
 
-        return rentalMapper.toDto(rentalRepository.save(rental));
-
+        return rentalMapper.toDto(rental);
     }
 
     @Override
@@ -135,7 +117,7 @@ public class RentalServiceImpl implements RentalService {
     @Override
     @Transactional(readOnly = true)
     public RentalResponseDto getRentalById(Long id) {
-        Rental rental =  rentalRepository.findById(id)
+        Rental rental = rentalRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Rental not found with id: " + id));
         return rentalMapper.toDto(rental);
     }
@@ -143,17 +125,10 @@ public class RentalServiceImpl implements RentalService {
     @Override
     @Transactional(readOnly = true)
     public RentalResponseDto getMyRentalById(Long id) {
-        User currentUser = getCurrentUser();
+        User currentUser = securityFacade.getCurrentUser();
 
         Rental rental = rentalRepository.findByIdAndUserId(id, currentUser.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Rental not found or access denied"));
         return rentalMapper.toDto(rental);
-    }
-
-    private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 }
