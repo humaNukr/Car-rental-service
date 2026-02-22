@@ -18,7 +18,7 @@ public class CarRequestDto {
     @NotBlank
     private String model;
 
-    @ValidEnum(enumClass = CarType.class, message = "Car type must be one of: SUV, SEDAN, WAGON, HATCHBACK")
+    @ValidEnum(enumClass = CarType.class)
     private CarType type;
 
     @NotBlank

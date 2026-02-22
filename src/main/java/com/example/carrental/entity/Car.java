@@ -1,9 +1,11 @@
 package com.example.carrental.entity;
 
+import com.example.carrental.domain.LicensePlate;
 import com.example.carrental.enums.CarStatus;
 import com.example.carrental.enums.CarType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -12,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
@@ -42,8 +45,8 @@ public class Car {
     @Column(nullable = false)
     private CarType type;
 
-    @Column(nullable = false, unique = true)
-    private String licensePlate;
+    @Embedded
+    private LicensePlate licensePlate;
 
     @Column(nullable = false)
     private BigDecimal dailyFee;
@@ -57,6 +60,9 @@ public class Car {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CarStatus status = CarStatus.AVAILABLE;
+
+    @Version
+    private Long version;
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CarImage> images = new ArrayList<>();

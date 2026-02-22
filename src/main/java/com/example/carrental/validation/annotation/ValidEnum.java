@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = {EnumValidator.class})
 public @interface ValidEnum {
-    String message() default "Invalid value";
+    String message() default "Car type must be one of:";
 
     Class<?>[] groups() default {};
 

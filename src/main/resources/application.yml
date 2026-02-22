@@ -17,6 +17,10 @@ spring:
     hibernate:
       ddl-auto: validate
 
+  jackson:
+    deserialization:
+      READ_UNKNOWN_ENUM_VALUES_AS_NULL: true
+
   liquibase:
     enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.yaml

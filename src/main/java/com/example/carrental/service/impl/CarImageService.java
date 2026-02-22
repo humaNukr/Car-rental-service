@@ -114,9 +114,6 @@ public class CarImageService extends ImageService {
     }
 
     public void deleteFolder(Long carId) {
-        carRepository.findById(carId)
-                .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + carId));
-
         super.deleteFolder(fileProperties.getSubdirs().getCar() + "/car-" + carId);
     }
 

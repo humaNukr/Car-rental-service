@@ -15,3 +15,5 @@ databaseChangeLog:
       file: db/changelog/changes/07-create-car-images-table.yaml
   - include:
       file: db/changelog/changes/08-add-status-to-rentals.yaml
+  - include:
+      file: db/changelog/changes/09-add-version-column-for-cars.yaml
