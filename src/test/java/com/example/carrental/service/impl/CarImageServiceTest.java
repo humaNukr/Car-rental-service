@@ -293,8 +293,6 @@ class CarImageServiceTest {
             Files.createFile(carDir.resolve("photo1.jpg"));
             Files.createFile(carDir.resolve("photo2.jpg"));
 
-            when(carRepository.findById(carId)).thenReturn(Optional.of(new Car()));
-
             service.deleteFolder(carId);
 
             assertThat(Files.exists(carDir)).isFalse();
@@ -304,8 +302,6 @@ class CarImageServiceTest {
         @DisplayName("Fail: Should throw FileStorageException if directory missing")
         void shouldThrowIfDirMissing() {
             Long carId = 5L;
-            when(carRepository.findById(carId)).thenReturn(Optional.of(new Car()));
-
             assertThatThrownBy(() -> service.deleteFolder(carId))
                     .isInstanceOf(FileStorageException.class)
                     .hasMessageContaining("Directory not found");

@@ -10,7 +10,9 @@ import com.example.carrental.exception.rental.RentalAlreadyFinishedException;
 import com.example.carrental.exception.user.UserAlreadyExistsException;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.jspecify.annotations.NonNull;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -94,6 +96,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleJwtException(JwtException ex) {
         log.warn("JWT Error: {}", ex.getMessage());
         return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex) {
+        log.warn("Constraint Violation: {}", ex.getMessage());
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getCause().getMessage());
     }
 
     @ExceptionHandler(Exception.class)

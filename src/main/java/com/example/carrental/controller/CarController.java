@@ -5,6 +5,7 @@ import com.example.carrental.dto.car.CarImagesDto;
 import com.example.carrental.dto.car.CarRequestDto;
 import com.example.carrental.dto.car.CarResponseDto;
 import com.example.carrental.dto.car.CarSearchParameters;
+import com.example.carrental.dto.car.CarUpdateRequestDto;
 import com.example.carrental.mapper.car.CarMapper;
 import com.example.carrental.service.impl.CarImageService;
 import com.example.carrental.service.interfaces.CarService;
@@ -18,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -59,9 +61,9 @@ public class CarController {
         return carService.save(carRequestDto);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public CarResponseDto updateCar(@PathVariable Long id, @RequestBody @Valid CarRequestDto carRequestDto) {
+    public CarResponseDto updateCar(@PathVariable Long id, @RequestBody @Valid CarUpdateRequestDto carRequestDto) {
         return carService.update(id, carRequestDto);
     }
 

@@ -1,5 +1,6 @@
 package com.example.carrental.controller;
 
+import com.example.carrental.domain.LicensePlate;
 import com.example.carrental.dto.exception.ErrorResponse;
 import com.example.carrental.dto.jwt.JwtAuthenticationDto;
 import com.example.carrental.dto.rental.RentalRequestDto;
@@ -148,7 +149,7 @@ class RentalControllerIntegrationTest extends BaseIntegrationTest {
         car.setModel("Camry");
         car.setType(CarType.SEDAN);
         car.setDailyFee(BigDecimal.TEN);
-        car.setLicensePlate(plate);
+        car.setLicensePlate(new LicensePlate(plate));
         car.setColor("Black");
         car.setStatus(status);
         car.setDeleted(false);

@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      author: humaNukr
+      id: 09-add-version-column-for-cars
+      changes:
+        - addColumn:
+            tableName: cars
+            columns:
+              - column:
+                  name: version
+                  type: bigint
+                  defaultValue: 0
+                  constraints:
+                    nullable: false

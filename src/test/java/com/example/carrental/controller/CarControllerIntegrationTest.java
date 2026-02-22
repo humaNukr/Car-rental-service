@@ -1,5 +1,6 @@
 package com.example.carrental.controller;
 
+import com.example.carrental.domain.LicensePlate;
 import com.example.carrental.dto.car.CarResponseDto;
 import com.example.carrental.entity.Car;
 import com.example.carrental.enums.CarStatus;
@@ -68,7 +69,7 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
         car.setModel(model);
         car.setType(type);
         car.setColor(color);
-        car.setLicensePlate(plate);
+        car.setLicensePlate(new LicensePlate(plate));
         car.setDailyFee(BigDecimal.valueOf(fee));
         car.setStatus(status);
         car.setDeleted(false);

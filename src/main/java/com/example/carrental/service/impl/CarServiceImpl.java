@@ -1,10 +1,13 @@
 package com.example.carrental.service.impl;
 
+import com.example.carrental.domain.LicensePlate;
 import com.example.carrental.dto.car.CarRequestDto;
 import com.example.carrental.dto.car.CarResponseDto;
 import com.example.carrental.dto.car.CarSearchParameters;
+import com.example.carrental.dto.car.CarUpdateRequestDto;
 import com.example.carrental.entity.Car;
 import com.example.carrental.enums.CarStatus;
+import com.example.carrental.event.CarDeletedEvent;
 import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.exception.car.CarUnavailableException;
 import com.example.carrental.exception.car.LicensePlateAlreadyExistsException;
@@ -13,6 +16,7 @@ import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.spec.CarSpecificationBuilder;
 import com.example.carrental.service.interfaces.CarService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -25,21 +29,19 @@ import java.util.List;
 public class CarServiceImpl implements CarService {
     private final CarRepository carRepository;
     private final CarMapper carMapper;
-    private final CarImageService imageService;
+    private final ApplicationEventPublisher eventPublisher;
     private final CarSpecificationBuilder carSpecificationBuilder;
 
     @Override
     @Transactional
     public CarResponseDto save(CarRequestDto dto) {
-        if (carRepository.existsByLicensePlate(dto.getLicensePlate())) {
-            throw new LicensePlateAlreadyExistsException("Car with this license plate already exists");
-        }
-
+        checkForPlatesConflict(new LicensePlate(dto.getLicensePlate()));
         Car car = carMapper.toEntity(dto);
         return carMapper.toResponseDto(carRepository.save(car));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CarResponseDto> getAll(CarSearchParameters parameters, Pageable pageable) {
         Specification<Car> spec = carSpecificationBuilder.build(parameters);
 
@@ -50,6 +52,7 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CarResponseDto getById(Long id) {
         Car car = getCarByIdIfExists(id);
         return carMapper.toResponseDto(car);
@@ -57,20 +60,18 @@ public class CarServiceImpl implements CarService {
 
     @Override
     @Transactional
-    public CarResponseDto update(Long id, CarRequestDto dto) {
+    public CarResponseDto update(Long id, CarUpdateRequestDto dto) {
         Car car = getCarByIdIfExists(id);
         carMapper.updateCarFromDto(dto, car);
-        return carMapper.toResponseDto(carRepository.save(car));
+        return carMapper.toResponseDto(car);
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-        if (!carRepository.existsById(id)) {
-            throw new EntityNotFoundException("Car not found with id: " + id);
-        }
-        imageService.deleteFolder(id);
-        carRepository.deleteById(id);
+        Car car = getCarByIdIfExists(id);
+        carRepository.delete(car);
+        eventPublisher.publishEvent(new CarDeletedEvent(id));
     }
 
     @Override
@@ -92,7 +93,13 @@ public class CarServiceImpl implements CarService {
     }
 
     private Car getCarByIdIfExists(Long id) {
-        return  carRepository.findById(id)
+        return carRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
+    }
+
+    private void checkForPlatesConflict(LicensePlate licensePlate) {
+        if (carRepository.existsByLicensePlate(licensePlate)) {
+            throw new LicensePlateAlreadyExistsException("Car with this license plate already exists");
+        }
     }
 }

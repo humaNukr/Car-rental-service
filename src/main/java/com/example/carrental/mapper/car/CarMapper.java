@@ -1,9 +1,11 @@
 package com.example.carrental.mapper.car;
 
 import com.example.carrental.config.MapperConfig;
+import com.example.carrental.domain.LicensePlate;
 import com.example.carrental.dto.car.CarDetailsDto;
 import com.example.carrental.dto.car.CarRequestDto;
 import com.example.carrental.dto.car.CarResponseDto;
+import com.example.carrental.dto.car.CarUpdateRequestDto;
 import com.example.carrental.entity.Car;
 import com.example.carrental.entity.CarImage;
 import org.mapstruct.AfterMapping;
@@ -38,13 +40,19 @@ public interface CarMapper {
 
     }
 
+    default LicensePlate mapToLicensePlate(String value) {
+        return value != null ? new LicensePlate(value) : null;
+    }
+
+    default String mapToString(LicensePlate licensePlate) {
+        return licensePlate != null ? licensePlate.value() : null;
+    }
+
     @Mapping(target = "deleted", ignore = true)
     Car toEntity(CarRequestDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateCarFromDto(CarRequestDto dto, @MappingTarget Car car);
-
-    CarDetailsDto toDetailsDto(Car car);
+    void updateCarFromDto(CarUpdateRequestDto dto, @MappingTarget Car car);
 
     CarDetailsDto toDetailsDto(CarResponseDto car, List<String> imageUrls);
 }
