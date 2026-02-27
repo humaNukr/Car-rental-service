@@ -3,9 +3,11 @@ package com.example.carrental.controller;
 import com.example.carrental.domain.LicensePlate;
 import com.example.carrental.dto.car.CarResponseDto;
 import com.example.carrental.entity.Car;
+import com.example.carrental.entity.Location;
 import com.example.carrental.enums.CarStatus;
 import com.example.carrental.enums.CarType;
 import com.example.carrental.repository.CarRepository;
+import com.example.carrental.repository.LocationRepository;
 import com.example.carrental.util.BaseIntegrationTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,35 +37,55 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
     private CarRepository carRepository;
 
     @Autowired
+    private LocationRepository locationRepository;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    private Location defaultLocation;
 
     @BeforeEach
     void setUp() {
         jdbcTemplate.execute("TRUNCATE TABLE cars CASCADE");
+        jdbcTemplate.execute("TRUNCATE TABLE locations CASCADE");
+        defaultLocation = createTestLocation();
         createTestCars();
     }
 
     @AfterEach
     void tearDown() {
         jdbcTemplate.execute("TRUNCATE TABLE cars CASCADE");
+        jdbcTemplate.execute("TRUNCATE TABLE locations CASCADE");
+    }
+
+    private Location createTestLocation() {
+        Location location = new Location();
+        location.setCity("Kyiv");
+        location.setAddress("Khreshchatyk 1");
+        location.setWorkHours("09:00 - 18:00");
+        location.setEmail("test@email.com");
+        location.setPhones(List.of("+380991234567"));
+        location.setLatitude(new BigDecimal("50.0"));
+        location.setLongitude(new BigDecimal("30.0"));
+        return locationRepository.save(location);
     }
 
     private void createTestCars() {
         saveCar("BMW", "X5", CarType.SUV, "Black",
-                "AA0001AA", 150, CarStatus.AVAILABLE);
+                "AA0001AA", 150, CarStatus.AVAILABLE, defaultLocation);
 
         saveCar("Toyota", "Camry", CarType.SEDAN, "Purple",
-                "AA0002AA", 50, CarStatus.AVAILABLE);
+                "AA0002AA", 50, CarStatus.AVAILABLE, defaultLocation);
 
         saveCar("BMW", "320", CarType.SEDAN, "White",
-                "AA0003AA", 90, CarStatus.AVAILABLE);
+                "AA0003AA", 90, CarStatus.AVAILABLE, defaultLocation);
 
         saveCar("Audi", "A4", CarType.WAGON, "Blue",
-                "AA0004AA", 80, CarStatus.AVAILABLE);
+                "AA0004AA", 80, CarStatus.AVAILABLE, defaultLocation);
     }
 
     private void saveCar(String brand, String model, CarType type, String color,
-                         String plate, double fee, CarStatus status) {
+                         String plate, double fee, CarStatus status, Location location) {
         Car car = new Car();
         car.setBrand(brand);
         car.setModel(model);
@@ -73,6 +95,7 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
         car.setDailyFee(BigDecimal.valueOf(fee));
         car.setStatus(status);
         car.setDeleted(false);
+        car.setCurrentLocation(location);
         carRepository.save(car);
     }
 
@@ -163,5 +186,4 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             assertEquals("X5", cars.getFirst().getModel());
         }
     }
-
 }
