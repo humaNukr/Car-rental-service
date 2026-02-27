@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -52,6 +53,14 @@ public class Rental {
 
     @Column(nullable = false)
     private boolean isDeleted = false;
+
+    @OneToOne
+    @JoinColumn(name = "pickup_location_id")
+    private Location pickupLocation;
+
+    @OneToOne
+    @JoinColumn(name = "drop_off_location_id")
+    private Location dropOffLocation;
 
 
 }

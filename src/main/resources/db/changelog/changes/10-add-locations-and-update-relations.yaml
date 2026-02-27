@@ -1,0 +1,105 @@
+databaseChangeLog:
+  - changeSet:
+      id: 10-add-locations
+      author: humaNukr
+      changes:
+        - createTable:
+            tableName: locations
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: city
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: address
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: work_hours
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: latitude
+                  type: DECIMAL(10, 8)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: longitude
+                  type: DECIMAL(11, 8)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_deleted
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 10-create-location-phones-table
+      author: your-name
+      changes:
+        - createTable:
+            tableName: location_phones
+            columns:
+              - column:
+                  name: location_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_location_phones_location
+                    references: locations(id)
+              - column:
+                  name: phones
+                  type: VARCHAR(255)
+
+  - changeSet:
+      id: 10-add-location-to-cars
+      author: your-name
+      changes:
+        - addColumn:
+            tableName: cars
+            columns:
+              - column:
+                  name: location_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_cars_location
+                    references: locations(id)
+
+  - changeSet:
+      id: 10-add-locations-to-rentals
+      author: your-name
+      changes:
+        - addColumn:
+            tableName: rentals
+            columns:
+              - column:
+                  name: pickup_location_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_rentals_pickup_location
+                    references: locations(id)
+              - column:
+                  name: drop_off_location_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_rentals_drop_off_location
+                    references: locations(id)

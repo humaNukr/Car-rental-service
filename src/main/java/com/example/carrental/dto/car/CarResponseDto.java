@@ -17,4 +17,5 @@ public class CarResponseDto {
     private CarStatus status;
     private BigDecimal dailyFee;
     private String mainImageUrl;
+    private Long locationId;
 }

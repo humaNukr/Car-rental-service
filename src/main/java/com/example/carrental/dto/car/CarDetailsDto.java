@@ -18,4 +18,5 @@ public class CarDetailsDto {
     private CarStatus status;
     private BigDecimal dailyFee;
     private List<String> imageUrls;
+    private Long locationId;
 }

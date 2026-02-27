@@ -3,9 +3,11 @@ package com.example.carrental.service.impl;
 import com.example.carrental.dto.rental.RentalRequestDto;
 import com.example.carrental.dto.rental.RentalResponseDto;
 import com.example.carrental.entity.Car;
+import com.example.carrental.entity.Location;
 import com.example.carrental.entity.Rental;
 import com.example.carrental.entity.User;
 import com.example.carrental.enums.CarStatus;
+import com.example.carrental.enums.RentalStatus;
 import com.example.carrental.event.RentalCreatedEvent;
 import com.example.carrental.event.RentalReturnedLateEvent;
 import com.example.carrental.exception.car.CarUnavailableException;
@@ -13,6 +15,7 @@ import com.example.carrental.mapper.rental.RentalMapper;
 import com.example.carrental.repository.RentalRepository;
 import com.example.carrental.security.SecurityFacade;
 import com.example.carrental.service.interfaces.CarService;
+import com.example.carrental.service.interfaces.LocationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -51,6 +54,8 @@ class RentalServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
     @Mock
+    private LocationService locationService;
+    @Mock
     private SecurityFacade securityFacade;
 
     @Captor
@@ -59,6 +64,8 @@ class RentalServiceTest {
     private RentalServiceImpl rentalService;
     private User defaultUser;
     private Car defaultCar;
+    private Location pickupLocation;
+    private Location dropOffLocation;
 
     @BeforeEach
     void setUp() {
@@ -67,7 +74,8 @@ class RentalServiceTest {
                 rentalMapper,
                 eventPublisher,
                 securityFacade,
-                carService
+                carService,
+                locationService
         );
 
         defaultUser = new User();
@@ -79,6 +87,14 @@ class RentalServiceTest {
         defaultCar.setBrand("BMW");
         defaultCar.setStatus(CarStatus.AVAILABLE);
         defaultCar.setDailyFee(BigDecimal.TEN);
+
+        pickupLocation = new Location();
+        pickupLocation.setId(1L);
+        pickupLocation.setCity("Kyiv");
+
+        dropOffLocation = new Location();
+        dropOffLocation.setId(2L);
+        dropOffLocation.setCity("Lviv");
     }
 
     @Nested
@@ -94,7 +110,12 @@ class RentalServiceTest {
             request.setCarId(defaultCar.getId());
             request.setRentalDate(LocalDate.now());
             request.setReturnDate(LocalDate.now().plusDays(3));
+            request.setPickupLocationId(pickupLocation.getId());
+            request.setDropOffLocationId(dropOffLocation.getId());
+
             when(carService.getAvailableCarForRental(defaultCar.getId())).thenReturn(defaultCar);
+            when(locationService.getLocationById(request.getPickupLocationId())).thenReturn(pickupLocation);
+            when(locationService.getLocationById(request.getDropOffLocationId())).thenReturn(dropOffLocation);
 
             when(rentalRepository.save(any(Rental.class))).thenAnswer(i -> {
                 Rental r = i.getArgument(0);
@@ -111,9 +132,11 @@ class RentalServiceTest {
             Rental savedRental = rentalCaptor.getValue();
 
             assertNull(savedRental.getActualReturnDate());
+            assertEquals(RentalStatus.PENDING, savedRental.getStatus());
             assertEquals(defaultUser, savedRental.getUser());
+            assertEquals(pickupLocation, savedRental.getPickupLocation());
 
-            verify(carService).changeStatus(defaultCar.getId(), CarStatus.RENTED);
+            verify(carService).markAsRented(defaultCar.getId());
             verify(eventPublisher).publishEvent(any(RentalCreatedEvent.class));
         }
 
@@ -124,6 +147,7 @@ class RentalServiceTest {
 
             RentalRequestDto request = new RentalRequestDto();
             request.setCarId(defaultCar.getId());
+            request.setPickupLocationId(1L);
 
             when(carService.getAvailableCarForRental(defaultCar.getId()))
                     .thenThrow(new CarUnavailableException("Car is not available for rental"));
@@ -131,7 +155,7 @@ class RentalServiceTest {
             assertThrows(CarUnavailableException.class, () -> rentalService.createRental(request));
 
             verify(rentalRepository, never()).save(any());
-            verify(carService, never()).changeStatus(any(), any());
+            verify(carService, never()).markAsRented(any());
             verify(eventPublisher, never()).publishEvent(any());
         }
     }
@@ -150,15 +174,16 @@ class RentalServiceTest {
             rental.setId(rentalId);
             rental.setCar(defaultCar);
             rental.setReturnDate(LocalDate.now());
+            rental.setDropOffLocation(dropOffLocation);
             rental.setActualReturnDate(null);
 
             when(rentalRepository.findById(rentalId)).thenReturn(Optional.of(rental));
 
-            RentalResponseDto result = rentalService.returnCar(rentalId);
+            RentalResponseDto result = rentalService.returnCar(rentalId, null);
 
             assertNotNull(result.getActualReturnDate());
 
-            verify(carService).changeStatus(defaultCar.getId(), CarStatus.AVAILABLE);
+            verify(carService).markAsReturned(defaultCar.getId(), dropOffLocation);
             verify(eventPublisher, never()).publishEvent(any(RentalReturnedLateEvent.class));
         }
 
@@ -173,13 +198,14 @@ class RentalServiceTest {
             rental.setId(rentalId);
             rental.setCar(defaultCar);
             rental.setReturnDate(LocalDate.now().minusDays(2));
+            rental.setDropOffLocation(dropOffLocation);
             rental.setActualReturnDate(null);
 
             when(rentalRepository.findById(rentalId)).thenReturn(Optional.of(rental));
 
-            rentalService.returnCar(rentalId);
+            rentalService.returnCar(rentalId, null);
 
-            verify(carService).changeStatus(defaultCar.getId(), CarStatus.AVAILABLE);
+            verify(carService).markAsReturned(defaultCar.getId(), dropOffLocation);
             verify(eventPublisher).publishEvent(any(RentalReturnedLateEvent.class));
         }
     }
@@ -187,10 +213,9 @@ class RentalServiceTest {
     @Nested
     @DisplayName("Get Rental")
     class GetRental {
-
         @Test
         @DisplayName("getMyRentalById: Should return rental when user is the owner")
-        void getMyRentalById_ShouldReturnRental_WhenUserIsOwner() {
+        void shouldReturnRentalWhenUserIsOwner() {
             Long rentalId = 1L;
             Long userId = 100L;
 
