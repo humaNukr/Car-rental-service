@@ -2,6 +2,7 @@ package com.example.carrental.service.interfaces;
 
 import com.example.carrental.dto.rental.RentalRequestDto;
 import com.example.carrental.dto.rental.RentalResponseDto;
+import com.example.carrental.dto.rental.RentalReturnRequestDto;
 import com.example.carrental.dto.rental.RentalUpdateRequestDto;
 import org.springframework.data.domain.Pageable;
 
@@ -14,7 +15,7 @@ public interface RentalService {
 
     List<RentalResponseDto> getMyRentals(Pageable pageable);
 
-    RentalResponseDto returnCar(Long rentalId);
+    RentalResponseDto returnCar(Long rentalId, RentalReturnRequestDto returnDto);
 
     List<RentalResponseDto> getAllActive(Pageable pageable);
 

@@ -32,4 +32,8 @@ public class CarRequestDto {
     @Positive
     private BigDecimal dailyFee;
 
+    @NotNull
+    @Positive
+    private Long locationId;
+
 }

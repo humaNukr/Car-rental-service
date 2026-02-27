@@ -2,11 +2,12 @@ package com.example.carrental.service.impl;
 
 import com.example.carrental.dto.rental.RentalRequestDto;
 import com.example.carrental.dto.rental.RentalResponseDto;
+import com.example.carrental.dto.rental.RentalReturnRequestDto;
 import com.example.carrental.dto.rental.RentalUpdateRequestDto;
 import com.example.carrental.entity.Car;
+import com.example.carrental.entity.Location;
 import com.example.carrental.entity.Rental;
 import com.example.carrental.entity.User;
-import com.example.carrental.enums.CarStatus;
 import com.example.carrental.enums.RentalStatus;
 import com.example.carrental.event.RentalCreatedEvent;
 import com.example.carrental.event.RentalReturnedLateEvent;
@@ -16,6 +17,7 @@ import com.example.carrental.mapper.rental.RentalMapper;
 import com.example.carrental.repository.RentalRepository;
 import com.example.carrental.security.SecurityFacade;
 import com.example.carrental.service.interfaces.CarService;
+import com.example.carrental.service.interfaces.LocationService;
 import com.example.carrental.service.interfaces.RentalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -35,6 +37,7 @@ public class RentalServiceImpl implements RentalService {
     private final ApplicationEventPublisher eventPublisher;
     private final SecurityFacade securityFacade;
     private final CarService carService;
+    private final LocationService locationService;
 
     @Override
     @Transactional
@@ -44,11 +47,16 @@ public class RentalServiceImpl implements RentalService {
         Car car = carService.getAvailableCarForRental(requestDto.getCarId());
 
         Rental rental = rentalMapper.toEntity(requestDto, car, user);
+
+        Location pickupLocation = locationService.getLocationById(requestDto.getPickupLocationId());
+        Location dropOffLocation = locationService.getLocationById(requestDto.getDropOffLocationId());
+
         rental.setStatus(RentalStatus.PENDING);
+        rental.setPickupLocation(pickupLocation);
+        rental.setDropOffLocation(dropOffLocation);
         Rental savedRental = rentalRepository.save(rental);
 
-        carService.changeStatus(car.getId(), CarStatus.RENTED);
-
+        carService.markAsRented(car.getId());
         eventPublisher.publishEvent(new RentalCreatedEvent(savedRental.getId()));
         return rentalMapper.toDto(savedRental);
     }
@@ -80,7 +88,7 @@ public class RentalServiceImpl implements RentalService {
 
     @Override
     @Transactional
-    public RentalResponseDto returnCar(Long rentalId) {
+    public RentalResponseDto returnCar(Long rentalId, RentalReturnRequestDto dto) {
         Rental rental = rentalRepository.findById(rentalId)
                 .orElseThrow(() -> new EntityNotFoundException("Rental not found"));
 
@@ -91,7 +99,11 @@ public class RentalServiceImpl implements RentalService {
         rental.setActualReturnDate(LocalDate.now());
         rental.setStatus(RentalStatus.COMPLETED);
 
-        carService.changeStatus(rental.getCar().getId(), CarStatus.AVAILABLE);
+        Location returnLocation = (dto != null && dto.getActualLocationId() != null)
+                ? locationService.getLocationById(dto.getActualLocationId())
+                : rental.getDropOffLocation();
+
+        carService.markAsReturned(rental.getCar().getId(), returnLocation);
 
         if (rental.getActualReturnDate().isAfter(rental.getReturnDate())) {
             long lateDays = ChronoUnit.DAYS.between(rental.getReturnDate(), rental.getActualReturnDate());

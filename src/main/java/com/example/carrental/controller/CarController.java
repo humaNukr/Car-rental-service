@@ -39,7 +39,6 @@ import java.util.List;
 public class CarController {
     private final CarService carService;
     private final CarImageService imageService;
-    private final CarMapper carMapper;
 
     @GetMapping
     public List<CarResponseDto> getAll(
@@ -47,11 +46,6 @@ public class CarController {
             Pageable pageable
     ) {
         return carService.getAll(searchParameters, pageable);
-    }
-
-    @GetMapping("/{id}")
-    public CarResponseDto getById(@PathVariable Long id) {
-        return carService.getById(id);
     }
 
     @PostMapping
@@ -74,15 +68,6 @@ public class CarController {
         carService.delete(id);
     }
 
-    @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<Void> uploadCarImages(
-            @PathVariable Long id,
-            @RequestPart("file") List<MultipartFile> files
-    ) {
-        imageService.uploadImages(id, files);
-        return ResponseEntity.ok().build();
-    }
 
     @GetMapping("/{id}/images")
     public CarImagesDto getCarImages(@PathVariable Long id) {
@@ -92,9 +77,17 @@ public class CarController {
 
     @GetMapping("/{id}/details")
     public CarDetailsDto getCarDetails(@PathVariable Long id) {
-        CarResponseDto car = carService.getById(id);
-        List<String> imageUrls = imageService.getImagesPaths(id);
-        return carMapper.toDetailsDto(car, imageUrls);
+        return carService.getDetails(id);
+    }
+
+    @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<Void> uploadCarImages(
+            @PathVariable Long id,
+            @RequestPart("file") List<MultipartFile> files
+    ) {
+        carService.uploadImages(id, files);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("{id}/images/main")
@@ -103,14 +96,14 @@ public class CarController {
             @PathVariable Long id,
             @RequestParam String imageUrl
     ) {
-        imageService.setMainImage(id, imageUrl);
+        carService.setMainImage(id, imageUrl);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("{id}/images")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<Void> deleteImages(@PathVariable Long id, @RequestParam List<String> imageUrls) {
-        imageService.deleteImages(id, imageUrls);
+        carService.deleteImages(id, imageUrls);
         return ResponseEntity.ok().build();
     }
 

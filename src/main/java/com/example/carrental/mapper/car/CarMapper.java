@@ -6,8 +6,10 @@ import com.example.carrental.dto.car.CarDetailsDto;
 import com.example.carrental.dto.car.CarRequestDto;
 import com.example.carrental.dto.car.CarResponseDto;
 import com.example.carrental.dto.car.CarUpdateRequestDto;
+import com.example.carrental.dto.location.LocationRequestDto;
 import com.example.carrental.entity.Car;
 import com.example.carrental.entity.CarImage;
+import com.example.carrental.entity.Location;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
@@ -19,6 +21,7 @@ import java.util.List;
 
 @Mapper(config = MapperConfig.class)
 public interface CarMapper {
+    @Mapping(target = "locationId", source = "currentLocation.id")
     CarResponseDto toResponseDto(Car car);
 
     @AfterMapping
@@ -49,10 +52,12 @@ public interface CarMapper {
     }
 
     @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "currentLocation", ignore = true)
     Car toEntity(CarRequestDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateCarFromDto(CarUpdateRequestDto dto, @MappingTarget Car car);
 
-    CarDetailsDto toDetailsDto(CarResponseDto car, List<String> imageUrls);
+    @Mapping(target = "locationId", source = "car.currentLocation.id")
+    CarDetailsDto toDetailsDto(Car car, List<String> imageUrls);
 }

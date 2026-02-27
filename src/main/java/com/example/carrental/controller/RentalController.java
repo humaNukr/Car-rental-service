@@ -2,6 +2,7 @@ package com.example.carrental.controller;
 
 import com.example.carrental.dto.rental.RentalRequestDto;
 import com.example.carrental.dto.rental.RentalResponseDto;
+import com.example.carrental.dto.rental.RentalReturnRequestDto;
 import com.example.carrental.dto.rental.RentalUpdateRequestDto;
 import com.example.carrental.service.interfaces.RentalService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,8 +46,8 @@ public class RentalController {
 
     @PostMapping("/{id}/return")
     @PreAuthorize("hasRole('MANAGER')")
-    public RentalResponseDto returnCar(@PathVariable Long id) {
-        return rentalService.returnCar(id);
+    public RentalResponseDto returnCar(@PathVariable Long id, @RequestBody RentalReturnRequestDto dto) {
+        return rentalService.returnCar(id, dto);
     }
 
     @GetMapping("/active")

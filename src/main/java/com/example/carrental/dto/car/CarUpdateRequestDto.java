@@ -9,4 +9,6 @@ public class CarUpdateRequestDto {
 
     @Positive
     private BigDecimal dailyFee;
+
+    private Long locationId;
 }
