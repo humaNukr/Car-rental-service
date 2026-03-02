@@ -11,8 +11,7 @@ import com.example.carrental.security.SecurityFacade;
 import com.example.carrental.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,11 +30,10 @@ public class UserServiceImpl implements UserService {
         User targetUser = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentEmail = authentication.getName();
+        User currentUser = securityFacade.getCurrentUser();
 
-        if (targetUser.getEmail().equals(currentEmail)) {
-            throw new RuntimeException("Action denied: You cannot change your own role.");
+        if (targetUser.getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("Action denied: You cannot change your own role.");
         }
 
         targetUser.setRole(requestDto.getRole());
@@ -49,6 +47,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserResponseDto updateProfile(UserUpdateRequestDto requestDto) {
         User user = securityFacade.getCurrentUser();
         mapper.updateUserFromDto(requestDto, user);

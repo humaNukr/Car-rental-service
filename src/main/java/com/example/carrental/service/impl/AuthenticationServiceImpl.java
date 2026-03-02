@@ -33,7 +33,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public UserResponseDto register(UserRegistrationRequestDto request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+        String normalizedEmail = request.getEmail().toLowerCase().trim();
+
+        if (userRepository.findByEmail(normalizedEmail).isPresent()) {
             throw new UserAlreadyExistsException("User with this email already exists");
         }
         User user = userMapper.toEntity(request);

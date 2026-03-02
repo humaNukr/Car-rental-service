@@ -4,6 +4,7 @@ import com.example.carrental.dto.user.UserResponseDto;
 import com.example.carrental.dto.user.UserRoleUpdateDto;
 import com.example.carrental.dto.user.UserUpdateRequestDto;
 import com.example.carrental.service.interfaces.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,13 +27,13 @@ public class UserController {
     }
 
     @PatchMapping("/me")
-    public UserResponseDto updateMyProfile(@RequestBody UserUpdateRequestDto requestDto) {
+    public UserResponseDto updateMyProfile(@RequestBody @Valid UserUpdateRequestDto requestDto) {
         return userService.updateProfile(requestDto);
     }
 
     @PatchMapping("/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
-    public UserResponseDto updateUserRole(@PathVariable Long id, @RequestBody UserRoleUpdateDto requestDto) {
+    public UserResponseDto updateUserRole(@PathVariable Long id, @RequestBody @Valid UserRoleUpdateDto requestDto) {
         return userService.updateRole(id, requestDto);
     }
 }

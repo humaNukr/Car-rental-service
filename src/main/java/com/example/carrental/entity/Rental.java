@@ -18,6 +18,7 @@ import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -62,5 +63,14 @@ public class Rental {
     @JoinColumn(name = "drop_off_location_id")
     private Location dropOffLocation;
 
+    public BigDecimal calculateTotalCost() {
+        if (rentalDate == null || returnDate == null || car == null) {
+            return BigDecimal.ZERO;
+        }
+        long days = java.time.temporal.ChronoUnit.DAYS.between(rentalDate, returnDate);
+        if (days == 0) days = 1;
+
+        return car.getDailyFee().multiply(BigDecimal.valueOf(days));
+    }
 
 }
