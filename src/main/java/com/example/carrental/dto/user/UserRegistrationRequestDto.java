@@ -1,5 +1,6 @@
 package com.example.carrental.dto.user;
 
+import com.example.carrental.validation.annotation.FieldMatch;
 import com.example.carrental.validation.annotation.Password;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -8,6 +9,7 @@ import lombok.Data;
 import lombok.ToString;
 
 @Data
+@FieldMatch(first = "password", second = "confirmPassword", message = "Passwords do not match")
 public class UserRegistrationRequestDto {
     @NotBlank
     @Email
