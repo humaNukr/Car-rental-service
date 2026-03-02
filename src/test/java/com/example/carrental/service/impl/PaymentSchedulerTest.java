@@ -3,7 +3,7 @@ package com.example.carrental.service.impl;
 import com.example.carrental.config.PaymentScheduler;
 import com.example.carrental.entity.Payment;
 import com.example.carrental.entity.Rental;
-import com.example.carrental.enums.PaymentStatus;
+import com.example.carrental.enums.payment.PaymentStatus;
 import com.example.carrental.event.PaymentExpiredEvent;
 import com.example.carrental.repository.PaymentRepository;
 import com.stripe.model.checkout.Session;

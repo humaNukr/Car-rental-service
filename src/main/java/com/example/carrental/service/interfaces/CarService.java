@@ -7,7 +7,6 @@ import com.example.carrental.dto.car.CarSearchParameters;
 import com.example.carrental.dto.car.CarUpdateRequestDto;
 import com.example.carrental.entity.Car;
 import com.example.carrental.entity.Location;
-import com.example.carrental.enums.CarStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 

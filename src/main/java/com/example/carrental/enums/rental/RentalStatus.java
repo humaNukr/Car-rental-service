@@ -1,4 +1,4 @@
-package com.example.carrental.enums;
+package com.example.carrental.enums.rental;
 
 public enum RentalStatus {
     PENDING,

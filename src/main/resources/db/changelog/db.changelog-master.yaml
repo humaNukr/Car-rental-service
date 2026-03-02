@@ -19,3 +19,5 @@ databaseChangeLog:
       file: db/changelog/changes/09-add-version-column-for-cars.yaml
   - include:
       file: db/changelog/changes/10-add-locations-and-update-relations.yaml
+  - include:
+      file: db/changelog/changes/11-add-car-clas-and-specifications.yaml

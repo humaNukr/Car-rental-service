@@ -2,8 +2,8 @@ package com.example.carrental.service.impl;
 
 import com.example.carrental.entity.Car;
 import com.example.carrental.entity.Rental;
-import com.example.carrental.enums.CarStatus;
-import com.example.carrental.enums.RentalStatus;
+import com.example.carrental.enums.car.CarStatus;
+import com.example.carrental.enums.rental.RentalStatus;
 import com.example.carrental.event.PaymentExpiredEvent;
 import com.example.carrental.listener.RentalEventListener;
 import com.example.carrental.repository.CarRepository;

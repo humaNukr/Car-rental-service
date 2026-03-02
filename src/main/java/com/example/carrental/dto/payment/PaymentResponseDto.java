@@ -1,7 +1,7 @@
 package com.example.carrental.dto.payment;
 
-import com.example.carrental.enums.PaymentStatus;
-import com.example.carrental.enums.PaymentType;
+import com.example.carrental.enums.payment.PaymentStatus;
+import com.example.carrental.enums.payment.PaymentType;
 import lombok.Data;
 
 import java.math.BigDecimal;

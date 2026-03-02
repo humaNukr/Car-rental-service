@@ -6,7 +6,7 @@ import com.example.carrental.dto.user.UserResponseDto;
 import com.example.carrental.dto.user.UserRoleUpdateDto;
 import com.example.carrental.dto.user.UserUpdateRequestDto;
 import com.example.carrental.entity.User;
-import com.example.carrental.enums.UserRole;
+import com.example.carrental.enums.user.UserRole;
 import com.example.carrental.repository.UserRepository;
 import com.example.carrental.util.BaseIntegrationTest;
 import org.junit.jupiter.api.AfterEach;

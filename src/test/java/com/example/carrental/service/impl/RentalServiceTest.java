@@ -3,11 +3,15 @@ package com.example.carrental.service.impl;
 import com.example.carrental.dto.rental.RentalRequestDto;
 import com.example.carrental.dto.rental.RentalResponseDto;
 import com.example.carrental.entity.Car;
+import com.example.carrental.domain.CarSpecification;
 import com.example.carrental.entity.Location;
 import com.example.carrental.entity.Rental;
 import com.example.carrental.entity.User;
-import com.example.carrental.enums.CarStatus;
-import com.example.carrental.enums.RentalStatus;
+import com.example.carrental.enums.car.CarClass;
+import com.example.carrental.enums.car.CarStatus;
+import com.example.carrental.enums.car.FuelType;
+import com.example.carrental.enums.car.TransmissionType;
+import com.example.carrental.enums.rental.RentalStatus;
 import com.example.carrental.event.RentalCreatedEvent;
 import com.example.carrental.event.RentalReturnedLateEvent;
 import com.example.carrental.exception.car.CarUnavailableException;
@@ -82,12 +86,6 @@ class RentalServiceTest {
         defaultUser.setId(10L);
         defaultUser.setEmail(USER_EMAIL);
 
-        defaultCar = new Car();
-        defaultCar.setId(5L);
-        defaultCar.setBrand("BMW");
-        defaultCar.setStatus(CarStatus.AVAILABLE);
-        defaultCar.setDailyFee(BigDecimal.TEN);
-
         pickupLocation = new Location();
         pickupLocation.setId(1L);
         pickupLocation.setCity("Kyiv");
@@ -95,6 +93,22 @@ class RentalServiceTest {
         dropOffLocation = new Location();
         dropOffLocation.setId(2L);
         dropOffLocation.setCity("Lviv");
+
+        defaultCar = new Car();
+        defaultCar.setId(5L);
+        defaultCar.setBrand("BMW");
+        defaultCar.setStatus(CarStatus.AVAILABLE);
+        defaultCar.setDailyFee(BigDecimal.TEN);
+        defaultCar.setCarClass(CarClass.STANDARD);
+
+        CarSpecification spec = new CarSpecification();
+        spec.setTransmission(TransmissionType.AUTOMATIC);
+        spec.setFuelType(FuelType.PETROL);
+        spec.setSeatingCapacity(5);
+        spec.setDoorsQuantity(4);
+        spec.setBagQuantity(2);
+        spec.setHasAirConditioning(true);
+        defaultCar.setSpecification(spec);
     }
 
     @Nested
@@ -226,6 +240,9 @@ class RentalServiceTest {
             Rental rental = new Rental();
             rental.setId(rentalId);
             rental.setUser(currentUser);
+            rental.setCar(defaultCar);
+            rental.setPickupLocation(pickupLocation);
+            rental.setDropOffLocation(dropOffLocation);
 
             when(securityFacade.getCurrentUser()).thenReturn(currentUser);
             when(rentalRepository.findByIdAndUserId(rentalId, userId)).thenReturn(Optional.of(rental));

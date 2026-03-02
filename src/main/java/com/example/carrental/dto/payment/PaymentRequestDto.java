@@ -1,6 +1,6 @@
 package com.example.carrental.dto.payment;
 
-import com.example.carrental.enums.PaymentType;
+import com.example.carrental.enums.payment.PaymentType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 

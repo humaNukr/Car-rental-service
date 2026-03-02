@@ -69,6 +69,26 @@ public class CarSpecificationBuilder {
 
         }
 
+        if (params.carClasses() != null && params.carClasses().length > 0) {
+            spec = spec.and((root, query, cb)
+                    -> root.get("carClass").in(Arrays.asList(params.carClasses())));
+        }
+
+        if (params.transmissions() != null && params.transmissions().length > 0) {
+            spec = spec.and((root, query, cb)
+                    -> root.get("specification").get("transmission").in(Arrays.asList(params.transmissions())));
+        }
+
+        if (params.fuelTypes() != null && params.fuelTypes().length > 0) {
+            spec = spec.and((root, query, cb)
+                    -> root.get("specification").get("fuelType").in(Arrays.asList(params.fuelTypes())));
+        }
+
+        if (params.hasAirConditioning() != null) {
+            spec = spec.and((root, query, cb)
+                    -> cb.equal(root.get("specification").get("hasAirConditioning"), params.hasAirConditioning()));
+        }
+
         return spec;
     }
 }
