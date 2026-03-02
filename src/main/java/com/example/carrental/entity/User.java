@@ -1,6 +1,6 @@
 package com.example.carrental.entity;
 
-import com.example.carrental.enums.UserRole;
+import com.example.carrental.enums.user.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

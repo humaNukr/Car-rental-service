@@ -1,5 +1,6 @@
 package com.example.carrental.dto.car;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
@@ -11,4 +12,7 @@ public class CarUpdateRequestDto {
     private BigDecimal dailyFee;
 
     private Long locationId;
+
+    @Valid
+    private CarSpecificationDto specification;
 }

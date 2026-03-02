@@ -9,15 +9,19 @@ import com.example.carrental.dto.rental.RentalReturnRequestDto;
 import com.example.carrental.dto.rental.RentalUpdateRequestDto;
 import com.example.carrental.dto.user.UserLoginRequestDto;
 import com.example.carrental.entity.Car;
+import com.example.carrental.domain.CarSpecification;
 import com.example.carrental.entity.Location;
 import com.example.carrental.entity.Payment;
 import com.example.carrental.entity.Rental;
 import com.example.carrental.entity.User;
-import com.example.carrental.enums.CarStatus;
-import com.example.carrental.enums.CarType;
-import com.example.carrental.enums.PaymentType;
-import com.example.carrental.enums.RentalStatus;
-import com.example.carrental.enums.UserRole;
+import com.example.carrental.enums.car.CarClass;
+import com.example.carrental.enums.car.CarStatus;
+import com.example.carrental.enums.car.CarType;
+import com.example.carrental.enums.car.FuelType;
+import com.example.carrental.enums.car.TransmissionType;
+import com.example.carrental.enums.payment.PaymentType;
+import com.example.carrental.enums.rental.RentalStatus;
+import com.example.carrental.enums.user.UserRole;
 import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.LocationRepository;
 import com.example.carrental.repository.PaymentRepository;
@@ -92,7 +96,6 @@ class RentalControllerIntegrationTest extends BaseIntegrationTest {
         defaultCar = createTestCar("AA0000AA", CarStatus.AVAILABLE, defaultPickupLocation);
         defaultToken = loginAndGetToken("customer@email.com");
     }
-
 
     @Nested
     @DisplayName("POST /api/rentals (Create Rental)")
@@ -553,6 +556,17 @@ class RentalControllerIntegrationTest extends BaseIntegrationTest {
         car.setStatus(status);
         car.setDeleted(false);
         car.setCurrentLocation(location);
+        car.setCarClass(CarClass.STANDARD);
+
+        CarSpecification spec = new CarSpecification();
+        spec.setTransmission(TransmissionType.AUTOMATIC);
+        spec.setFuelType(FuelType.PETROL);
+        spec.setSeatingCapacity(5);
+        spec.setDoorsQuantity(4);
+        spec.setBagQuantity(2);
+        spec.setHasAirConditioning(true);
+        car.setSpecification(spec);
+
         return carRepository.save(car);
     }
 

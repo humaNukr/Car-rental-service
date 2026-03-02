@@ -6,7 +6,7 @@ import com.example.carrental.dto.user.UserLoginRequestDto;
 import com.example.carrental.dto.user.UserRegistrationRequestDto;
 import com.example.carrental.dto.user.UserResponseDto;
 import com.example.carrental.entity.User;
-import com.example.carrental.enums.UserRole;
+import com.example.carrental.enums.user.UserRole;
 import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.exception.user.UserAlreadyExistsException;
 import com.example.carrental.mapper.user.UserMapper;

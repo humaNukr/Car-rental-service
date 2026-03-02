@@ -8,7 +8,7 @@ import com.example.carrental.entity.Car;
 import com.example.carrental.entity.Location;
 import com.example.carrental.entity.Rental;
 import com.example.carrental.entity.User;
-import com.example.carrental.enums.RentalStatus;
+import com.example.carrental.enums.rental.RentalStatus;
 import com.example.carrental.event.RentalCreatedEvent;
 import com.example.carrental.event.RentalReturnedLateEvent;
 import com.example.carrental.exception.base.EntityNotFoundException;

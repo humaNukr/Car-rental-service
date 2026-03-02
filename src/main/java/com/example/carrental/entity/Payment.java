@@ -1,7 +1,7 @@
 package com.example.carrental.entity;
 
-import com.example.carrental.enums.PaymentStatus;
-import com.example.carrental.enums.PaymentType;
+import com.example.carrental.enums.payment.PaymentStatus;
+import com.example.carrental.enums.payment.PaymentType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

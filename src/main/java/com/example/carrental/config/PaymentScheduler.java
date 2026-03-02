@@ -1,7 +1,7 @@
 package com.example.carrental.config;
 
 import com.example.carrental.entity.Payment;
-import com.example.carrental.enums.PaymentStatus;
+import com.example.carrental.enums.payment.PaymentStatus;
 import com.example.carrental.event.PaymentExpiredEvent;
 import com.example.carrental.repository.PaymentRepository;
 import com.stripe.exception.StripeException;

@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: 11-add-car-class-and-specifications
+      author: humaNukr
+      changes:
+        - addColumn:
+            tableName: cars
+            columns:
+              - column:
+                  name: car_class
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: transmission_type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: fuel_type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: seating_capacity
+                  type: INT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: doors_quantity
+                  type: INT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: bag_quantity
+                  type: INT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: has_air_conditioning
+                  type: BOOLEAN
+                  constraints:
+                    nullable: true

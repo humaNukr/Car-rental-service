@@ -3,9 +3,13 @@ package com.example.carrental.controller;
 import com.example.carrental.domain.LicensePlate;
 import com.example.carrental.dto.car.CarResponseDto;
 import com.example.carrental.entity.Car;
+import com.example.carrental.domain.CarSpecification;
 import com.example.carrental.entity.Location;
-import com.example.carrental.enums.CarStatus;
-import com.example.carrental.enums.CarType;
+import com.example.carrental.enums.car.CarClass;
+import com.example.carrental.enums.car.CarStatus;
+import com.example.carrental.enums.car.CarType;
+import com.example.carrental.enums.car.FuelType;
+import com.example.carrental.enums.car.TransmissionType;
 import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.LocationRepository;
 import com.example.carrental.util.BaseIntegrationTest;
@@ -71,21 +75,22 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     private void createTestCars() {
-        saveCar("BMW", "X5", CarType.SUV, "Black",
-                "AA0001AA", 150, CarStatus.AVAILABLE, defaultLocation);
+        saveCar("BMW", "X5", CarType.SUV, "Black", "AA0001AA", 150, CarStatus.AVAILABLE, defaultLocation,
+                CarClass.PREMIUM, TransmissionType.AUTOMATIC, FuelType.DIESEL, true);
 
-        saveCar("Toyota", "Camry", CarType.SEDAN, "Purple",
-                "AA0002AA", 50, CarStatus.AVAILABLE, defaultLocation);
+        saveCar("Toyota", "Camry", CarType.SEDAN, "Purple", "AA0002AA", 50, CarStatus.AVAILABLE, defaultLocation,
+                CarClass.STANDARD, TransmissionType.AUTOMATIC, FuelType.PETROL, true);
 
-        saveCar("BMW", "320", CarType.SEDAN, "White",
-                "AA0003AA", 90, CarStatus.AVAILABLE, defaultLocation);
+        saveCar("BMW", "320", CarType.SEDAN, "White", "AA0003AA", 90, CarStatus.AVAILABLE, defaultLocation,
+                CarClass.STANDARD, TransmissionType.MANUAL, FuelType.PETROL, true);
 
-        saveCar("Audi", "A4", CarType.WAGON, "Blue",
-                "AA0004AA", 80, CarStatus.AVAILABLE, defaultLocation);
+        saveCar("Audi", "A4", CarType.WAGON, "Blue", "AA0004AA", 80, CarStatus.AVAILABLE, defaultLocation,
+                CarClass.ECONOMY, TransmissionType.MANUAL, FuelType.DIESEL, false);
     }
 
     private void saveCar(String brand, String model, CarType type, String color,
-                         String plate, double fee, CarStatus status, Location location) {
+                         String plate, double fee, CarStatus status, Location location,
+                         CarClass carClass, TransmissionType transmission, FuelType fuelType, boolean hasAc) {
         Car car = new Car();
         car.setBrand(brand);
         car.setModel(model);
@@ -96,6 +101,17 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
         car.setStatus(status);
         car.setDeleted(false);
         car.setCurrentLocation(location);
+        car.setCarClass(carClass);
+
+        CarSpecification spec = new CarSpecification();
+        spec.setTransmission(transmission);
+        spec.setFuelType(fuelType);
+        spec.setSeatingCapacity(5);
+        spec.setDoorsQuantity(4);
+        spec.setBagQuantity(2);
+        spec.setHasAirConditioning(hasAc);
+        car.setSpecification(spec);
+
         carRepository.save(car);
     }
 
@@ -108,11 +124,7 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             String url = createUrl("/api/cars?brands=BMW");
 
             ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<>() {
-                    }
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
             );
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -129,11 +141,7 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             String url = createUrl("/api/cars?types=SUV,SEDAN");
 
             ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<>() {
-                    }
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
             );
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -149,11 +157,7 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             String url = createUrl("/api/cars?minDailyFee=40&maxDailyFee=100");
 
             ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<>() {
-                    }
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
             );
 
             List<CarResponseDto> cars = response.getBody();
@@ -172,11 +176,7 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             String url = createUrl("/api/cars?brands=BMW&colors=Black");
 
             ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<>() {
-                    }
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
             );
 
             List<CarResponseDto> cars = response.getBody();
@@ -184,6 +184,90 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             assertNotNull(cars);
             assertEquals(1, cars.size());
             assertEquals("X5", cars.getFirst().getModel());
+        }
+
+        @Test
+        @DisplayName("filter by car class: Should return PREMIUM and STANDARD cars")
+        void givenCarsWhenFilterByCarClassThenReturnMatched() {
+            String url = createUrl("/api/cars?carClasses=PREMIUM,STANDARD");
+
+            ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
+            );
+
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            List<CarResponseDto> cars = response.getBody();
+
+            assertNotNull(cars);
+            assertEquals(3, cars.size());
+        }
+
+        @Test
+        @DisplayName("filter by transmission: Should return only MANUAL cars")
+        void givenCarsWhenFilterByTransmissionThenReturnManuals() {
+            String url = createUrl("/api/cars?transmissions=MANUAL");
+
+            ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
+            );
+
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            List<CarResponseDto> cars = response.getBody();
+
+            assertNotNull(cars);
+            assertEquals(2, cars.size());
+            assertTrue(cars.stream().allMatch(c ->
+                    c.getModel().equals("320") || c.getModel().equals("A4")));
+        }
+
+        @Test
+        @DisplayName("filter by fuel type: Should return only DIESEL cars")
+        void givenCarsWhenFilterByFuelTypeThenReturnDiesels() {
+            String url = createUrl("/api/cars?fuelTypes=DIESEL");
+
+            ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
+            );
+
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            List<CarResponseDto> cars = response.getBody();
+
+            assertNotNull(cars);
+            assertEquals(2, cars.size());
+        }
+
+        @Test
+        @DisplayName("filter by air conditioning: Should return cars without AC")
+        void givenCarsWhenFilterByHasAcThenReturnMatched() {
+            String url = createUrl("/api/cars?hasAirConditioning=false");
+
+            ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
+            );
+
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            List<CarResponseDto> cars = response.getBody();
+
+            assertNotNull(cars);
+            assertEquals(1, cars.size());
+            assertEquals("A4", cars.getFirst().getModel());
+        }
+
+        @Test
+        @DisplayName("complex filter: BMW with MANUAL transmission")
+        void givenCarsWhenFilterByBrandAndTransmissionThenReturnMatched() {
+            String url = createUrl("/api/cars?brands=BMW&transmissions=MANUAL");
+
+            ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
+            );
+
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            List<CarResponseDto> cars = response.getBody();
+
+            assertNotNull(cars);
+            assertEquals(1, cars.size());
+            assertEquals("320", cars.getFirst().getModel());
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.example.carrental.entity;
 
-import com.example.carrental.enums.RentalStatus;
+import com.example.carrental.enums.rental.RentalStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

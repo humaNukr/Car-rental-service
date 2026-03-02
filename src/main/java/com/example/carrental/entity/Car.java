@@ -1,8 +1,10 @@
 package com.example.carrental.entity;
 
+import com.example.carrental.domain.CarSpecification;
 import com.example.carrental.domain.LicensePlate;
-import com.example.carrental.enums.CarStatus;
-import com.example.carrental.enums.CarType;
+import com.example.carrental.enums.car.CarClass;
+import com.example.carrental.enums.car.CarStatus;
+import com.example.carrental.enums.car.CarType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -73,4 +75,11 @@ public class Car {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id")
     private Location currentLocation;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "car_class", nullable = false)
+    private CarClass carClass;
+
+    @Embedded
+    private CarSpecification specification;
 }

@@ -1,6 +1,6 @@
 package com.example.carrental.dto.user;
 
-import com.example.carrental.enums.UserRole;
+import com.example.carrental.enums.user.UserRole;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 

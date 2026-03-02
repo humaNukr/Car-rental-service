@@ -1,8 +1,8 @@
 package com.example.carrental.repository;
 
 import com.example.carrental.entity.Payment;
-import com.example.carrental.enums.PaymentStatus;
-import com.example.carrental.enums.PaymentType;
+import com.example.carrental.enums.payment.PaymentStatus;
+import com.example.carrental.enums.payment.PaymentType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
