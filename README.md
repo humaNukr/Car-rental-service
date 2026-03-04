@@ -1,4 +1,4 @@
-# 🚗 Enterprise Car Rental Service API
+# 🚗 Car Rental Service API
 
 ![Java](https://img.shields.io/badge/Java-21-orange.svg?style=flat-square&logo=java)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.9-brightgreen.svg?style=flat-square&logo=springboot)
