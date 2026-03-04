@@ -2,6 +2,7 @@ package com.example.carrental.notification;
 
 import com.example.carrental.exception.notification.TelegramBotException;
 import com.example.carrental.properties.BotProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -9,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
+@Slf4j
 public class CarRentalBot extends TelegramLongPollingBot {
 
     private final BotProperties botProperties;
@@ -25,7 +27,7 @@ public class CarRentalBot extends TelegramLongPollingBot {
             long chatId = update.getMessage().getChatId();
 
             if (messageText.equals("/start")) {
-                System.out.println("New user started bot. Chat ID: " + chatId);
+                log.info("New user started bot. Chat ID: {}", chatId);
                 sendMessage(chatId, "Hello! Your Chat ID is: " + chatId + "\nCopy this to your application.yaml!");
             }
         }
