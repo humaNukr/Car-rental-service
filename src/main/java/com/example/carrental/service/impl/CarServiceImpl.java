@@ -138,7 +138,7 @@ public class CarServiceImpl implements CarService {
     }
 
     private Car getCarByIdIfExists(Long id) {
-        return carRepository.findById(id)
+        return carRepository.findByIdWithPessimisticLock(id)
                 .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
     }
 

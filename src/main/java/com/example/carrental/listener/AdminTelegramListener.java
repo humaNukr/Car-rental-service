@@ -8,6 +8,7 @@ import com.example.carrental.service.interfaces.TelegramNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class AdminTelegramListener {
     private final PaymentRepository paymentRepository;
 
     @EventListener
+    @Async("notificationTaskExecutor")
     @Transactional(readOnly = true)
     public void handleRentalCreated(RentalCreatedEvent event) {
         rentalRepository.findById(event.rentalId()).ifPresent(rental -> {
@@ -36,6 +38,7 @@ public class AdminTelegramListener {
     }
 
     @EventListener
+    @Async("notificationTaskExecutor")
     @Transactional(readOnly = true)
     public void handlePaymentReceived(PaymentReceivedEvent event) {
         paymentRepository.findById(event.paymentId()).ifPresent(payment -> {

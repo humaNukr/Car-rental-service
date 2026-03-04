@@ -15,7 +15,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class CarImageCleanupListener {
     private final CarImageService imageService;
 
-    @Async
+    @Async("fileTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCarDeleted(CarDeletedEvent event) {
         log.info("Transaction committed. Starting file cleanup for car {}", event.carId());

@@ -23,7 +23,7 @@ public class CustomerEmailListener {
     private final PaymentRepository paymentRepository;
     private final AppProperties appProperties;
 
-    @Async
+    @Async("notificationTaskExecutor")
     @EventListener
     @Transactional(readOnly = true)
     public void handlePaymentReceived(PaymentReceivedEvent event) {

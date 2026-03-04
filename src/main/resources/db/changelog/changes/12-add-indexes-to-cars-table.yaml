@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: 12-add-indexes-to-cars-table
+      author: humaNukr
+      changes:
+        - createIndex:
+            indexName: idx_cars_brand
+            tableName: cars
+            columns:
+              - column:
+                  name: brand
+        - createIndex:
+            indexName: idx_cars_type
+            tableName: cars
+            columns:
+              - column:
+                  name: type
+        - createIndex:
+            indexName: idx_cars_class
+            tableName: cars
+            columns:
+              - column:
+                  name: car_class
+        - createIndex:
+            indexName: idx_cars_status
+            tableName: cars
+            columns:
+              - column:
+                  name: status
+        - createIndex:
+            indexName: idx_cars_fuel_type
+            tableName: cars
+            columns:
+              - column:
+                  name: fuel_type
+        - createIndex:
+            indexName: idx_cars_transmission
+            tableName: cars
+            columns:
+              - column:
+                  name: transmission_type

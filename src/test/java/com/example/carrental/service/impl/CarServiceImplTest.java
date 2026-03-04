@@ -171,7 +171,7 @@ class CarServiceImplTest {
         @Test
         @DisplayName("Should merge car data and images")
         void shouldReturnCarDetailsWithImages() {
-            when(carRepository.findById(10L)).thenReturn(Optional.of(defaultCar));
+            when(carRepository.findByIdWithPessimisticLock(10L)).thenReturn(Optional.of(defaultCar));
             List<String> images = List.of("url1", "url2");
             when(carImageService.getImagesPaths(10L)).thenReturn(images);
 
@@ -189,7 +189,7 @@ class CarServiceImplTest {
         @Test
         @DisplayName("Should delete car and publish event")
         void shouldDeleteAndPublishEvent() {
-            when(carRepository.findById(10L)).thenReturn(Optional.of(defaultCar));
+            when(carRepository.findByIdWithPessimisticLock(10L)).thenReturn(Optional.of(defaultCar));
 
             carService.delete(10L);
 
@@ -208,7 +208,7 @@ class CarServiceImplTest {
         @Test
         @DisplayName("markAsRented: Should change status to RENTED and remove location")
         void markAsRentedShouldUpdateState() {
-            when(carRepository.findById(10L)).thenReturn(Optional.of(defaultCar));
+            when(carRepository.findByIdWithPessimisticLock(10L)).thenReturn(Optional.of(defaultCar));
 
             carService.markAsRented(10L);
 
@@ -221,7 +221,7 @@ class CarServiceImplTest {
         @DisplayName("markAsRented: Should throw if car is not AVAILABLE")
         void markAsRentedShouldThrowIfNotAvailable() {
             defaultCar.setStatus(CarStatus.UNAVAILABLE);
-            when(carRepository.findById(10L)).thenReturn(Optional.of(defaultCar));
+            when(carRepository.findByIdWithPessimisticLock(10L)).thenReturn(Optional.of(defaultCar));
 
             assertThatThrownBy(() -> carService.markAsRented(10L))
                     .isInstanceOf(CarUnavailableException.class);
@@ -236,7 +236,7 @@ class CarServiceImplTest {
             newLocation.setId(2L);
             newLocation.setCity("Lviv");
 
-            when(carRepository.findById(10L)).thenReturn(Optional.of(defaultCar));
+            when(carRepository.findByIdWithPessimisticLock(10L)).thenReturn(Optional.of(defaultCar));
 
             carService.markAsReturned(10L, newLocation);
 
@@ -252,7 +252,7 @@ class CarServiceImplTest {
         @Test
         @DisplayName("Should throw EntityNotFoundException if car doesn't exist before uploading images")
         void uploadImagesShouldCheckIfCarExists() {
-            when(carRepository.findById(99L)).thenReturn(Optional.empty());
+            when(carRepository.findByIdWithPessimisticLock(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> carService.uploadImages(99L, List.of()))
                     .isInstanceOf(EntityNotFoundException.class);
