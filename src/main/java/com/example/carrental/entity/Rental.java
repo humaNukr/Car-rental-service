@@ -68,7 +68,9 @@ public class Rental {
             return BigDecimal.ZERO;
         }
         long days = java.time.temporal.ChronoUnit.DAYS.between(rentalDate, returnDate);
-        if (days == 0) days = 1;
+        if (days == 0) {
+            days = 1;
+        }
 
         return car.getDailyFee().multiply(BigDecimal.valueOf(days));
     }

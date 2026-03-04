@@ -26,9 +26,12 @@ public interface CarService {
     Car getAvailableCarForRental(Long carId);
 
     void markAsRented(Long carId);
+
     void markAsReturned(Long carId, Location location);
 
     void uploadImages(Long carId, List<MultipartFile> files);
+
     void setMainImage(Long carId, String imageUrl);
+
     void deleteImages(Long carId, List<String> imageUrls);
 }

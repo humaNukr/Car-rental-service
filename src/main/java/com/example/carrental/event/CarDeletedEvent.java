@@ -1,3 +1,4 @@
 package com.example.carrental.event;
 
-public record CarDeletedEvent(Long carId) {}
+public record CarDeletedEvent(Long carId) {
+}

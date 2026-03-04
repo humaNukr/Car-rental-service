@@ -1,5 +1,6 @@
 package com.example.carrental.controller;
 
+import com.example.carrental.domain.CarSpecification;
 import com.example.carrental.domain.LicensePlate;
 import com.example.carrental.dto.exception.ErrorResponse;
 import com.example.carrental.dto.jwt.JwtAuthenticationDto;
@@ -9,7 +10,6 @@ import com.example.carrental.dto.rental.RentalReturnRequestDto;
 import com.example.carrental.dto.rental.RentalUpdateRequestDto;
 import com.example.carrental.dto.user.UserLoginRequestDto;
 import com.example.carrental.entity.Car;
-import com.example.carrental.domain.CarSpecification;
 import com.example.carrental.entity.Location;
 import com.example.carrental.entity.Payment;
 import com.example.carrental.entity.Rental;
@@ -95,6 +95,125 @@ class RentalControllerIntegrationTest extends BaseIntegrationTest {
         defaultCustomer = createTestUser("customer@email.com", UserRole.CUSTOMER);
         defaultCar = createTestCar("AA0000AA", CarStatus.AVAILABLE, defaultPickupLocation);
         defaultToken = loginAndGetToken("customer@email.com");
+    }
+
+    private Location createTestLocation(String city, String address) {
+        Location location = new Location();
+        location.setCity(city);
+        location.setAddress(address);
+        location.setWorkHours("09:00 - 18:00");
+        location.setEmail("test@email.com");
+        location.setPhones(List.of("+380991234567"));
+        location.setLatitude(new BigDecimal("50.0"));
+        location.setLongitude(new BigDecimal("30.0"));
+        return locationRepository.save(location);
+    }
+
+    private Rental saveRental(User user, Car car, boolean isReturned) {
+        Rental rental = new Rental();
+        rental.setUser(user);
+        rental.setCar(car);
+        rental.setRentalDate(LocalDate.now().minusDays(2));
+        rental.setReturnDate(LocalDate.now().plusDays(2));
+        rental.setPickupLocation(defaultPickupLocation);
+        rental.setDropOffLocation(defaultDropOffLocation);
+
+        if (isReturned) {
+            rental.setActualReturnDate(LocalDate.now());
+            car.setStatus(CarStatus.AVAILABLE);
+            rental.setStatus(RentalStatus.COMPLETED);
+        } else {
+            rental.setActualReturnDate(null);
+            car.setStatus(CarStatus.RENTED);
+            rental.setStatus(RentalStatus.PAID);
+        }
+        carRepository.save(car);
+        return rentalRepository.save(rental);
+    }
+
+    private <T, D> ResponseEntity<T> executeRequest(
+            String url,
+            HttpMethod httpMethod,
+            D dto,
+            String token,
+            Class<T> responseType
+    ) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        HttpEntity<D> request = new HttpEntity<>(dto, headers);
+
+        return restTemplate.exchange(url, httpMethod, request, responseType);
+    }
+
+    private RentalRequestDto createRentalRequest(Long carId, LocalDate start, LocalDate end) {
+        RentalRequestDto dto = new RentalRequestDto();
+        dto.setCarId(carId);
+        dto.setRentalDate(start);
+        dto.setReturnDate(end);
+        dto.setPickupLocationId(defaultPickupLocation.getId());
+        dto.setDropOffLocationId(defaultDropOffLocation.getId());
+        return dto;
+    }
+
+    private User createTestUser(String email, UserRole role) {
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode("password"));
+        user.setFirstName("Test");
+        user.setLastName("User");
+        user.setRole(role);
+        return userRepository.save(user);
+    }
+
+    private Rental createTestRental(LocalDate rentalDate, LocalDate returnDate) {
+        Rental rental = new Rental();
+        rental.setUser(defaultCustomer);
+        rental.setCar(defaultCar);
+        rental.setRentalDate(rentalDate);
+        rental.setReturnDate(returnDate);
+        rental.setPickupLocation(defaultPickupLocation);
+        rental.setDropOffLocation(defaultDropOffLocation);
+        rental.setStatus(RentalStatus.PAID);
+        return rental;
+    }
+
+    private Car createTestCar(String plate, CarStatus status, Location location) {
+        Car car = new Car();
+        car.setBrand("Toyota");
+        car.setModel("Camry");
+        car.setType(CarType.SEDAN);
+        car.setDailyFee(BigDecimal.TEN);
+        car.setLicensePlate(new LicensePlate(plate));
+        car.setColor("Black");
+        car.setStatus(status);
+        car.setDeleted(false);
+        car.setCurrentLocation(location);
+        car.setCarClass(CarClass.STANDARD);
+
+        CarSpecification spec = new CarSpecification();
+        spec.setTransmission(TransmissionType.AUTOMATIC);
+        spec.setFuelType(FuelType.PETROL);
+        spec.setSeatingCapacity(5);
+        spec.setDoorsQuantity(4);
+        spec.setBagQuantity(2);
+        spec.setHasAirConditioning(true);
+        car.setSpecification(spec);
+
+        return carRepository.save(car);
+    }
+
+    private String loginAndGetToken(String email) {
+        UserLoginRequestDto loginRequest = new UserLoginRequestDto();
+        loginRequest.setEmail(email);
+        loginRequest.setPassword("password");
+
+        ResponseEntity<JwtAuthenticationDto> response = restTemplate.postForEntity(
+                createUrl("/api/auth/login"),
+                loginRequest,
+                JwtAuthenticationDto.class
+        );
+        assertNotNull(response.getBody());
+        return response.getBody().getToken();
     }
 
     @Nested
@@ -224,19 +343,21 @@ class RentalControllerIntegrationTest extends BaseIntegrationTest {
         @DisplayName("Success: Late return should trigger AUTO-FINE")
         void shouldTriggerFineWhenLate() {
             createTestUser("manager_fine@email.com", UserRole.MANAGER);
-            String managerToken = loginAndGetToken("manager_fine@email.com");
+
+            defaultCar.setStatus(CarStatus.RENTED);
+            defaultCar.setCurrentLocation(null);
+            carRepository.save(defaultCar);
 
             Rental rental = createTestRental(
                     LocalDate.now().minusDays(5),
                     LocalDate.now().minusDays(2)
             );
-            defaultCar.setStatus(CarStatus.RENTED);
-            defaultCar.setCurrentLocation(null);
-            carRepository.save(defaultCar);
             rental = rentalRepository.save(rental);
 
             RentalReturnRequestDto returnDto = new RentalReturnRequestDto();
             returnDto.setActualLocationId(defaultDropOffLocation.getId());
+
+            String managerToken = loginAndGetToken("manager_fine@email.com");
 
             ResponseEntity<RentalResponseDto> response = executeRequest(
                     createUrl("/api/rentals/" + rental.getId() + "/return"),
@@ -263,7 +384,6 @@ class RentalControllerIntegrationTest extends BaseIntegrationTest {
         @DisplayName("Success: On-time return should NOT trigger fine")
         void shouldNotTriggerFineWhenOnTime() {
             createTestUser("manager_ontime@email.com", UserRole.MANAGER);
-            String managerToken = loginAndGetToken("manager_ontime@email.com");
 
             Rental rental = createTestRental(
                     LocalDate.now().plusDays(1),
@@ -272,6 +392,9 @@ class RentalControllerIntegrationTest extends BaseIntegrationTest {
             defaultCar.setStatus(CarStatus.RENTED);
             carRepository.save(defaultCar);
             rental = rentalRepository.save(rental);
+
+
+            String managerToken = loginAndGetToken("manager_ontime@email.com");
 
             executeRequest(
                     createUrl("/api/rentals/" + rental.getId() + "/return"),
@@ -463,124 +586,5 @@ class RentalControllerIntegrationTest extends BaseIntegrationTest {
             assertNotNull(errors);
             assertTrue(errors.containsKey("returnDate"));
         }
-    }
-
-    private Location createTestLocation(String city, String address) {
-        Location location = new Location();
-        location.setCity(city);
-        location.setAddress(address);
-        location.setWorkHours("09:00 - 18:00");
-        location.setEmail("test@email.com");
-        location.setPhones(List.of("+380991234567"));
-        location.setLatitude(new BigDecimal("50.0"));
-        location.setLongitude(new BigDecimal("30.0"));
-        return locationRepository.save(location);
-    }
-
-    private Rental saveRental(User user, Car car, boolean isReturned) {
-        Rental rental = new Rental();
-        rental.setUser(user);
-        rental.setCar(car);
-        rental.setRentalDate(LocalDate.now().minusDays(2));
-        rental.setReturnDate(LocalDate.now().plusDays(2));
-        rental.setPickupLocation(defaultPickupLocation);
-        rental.setDropOffLocation(defaultDropOffLocation);
-
-        if (isReturned) {
-            rental.setActualReturnDate(LocalDate.now());
-            car.setStatus(CarStatus.AVAILABLE);
-            rental.setStatus(RentalStatus.COMPLETED);
-        } else {
-            rental.setActualReturnDate(null);
-            car.setStatus(CarStatus.RENTED);
-            rental.setStatus(RentalStatus.PAID);
-        }
-        carRepository.save(car);
-        return rentalRepository.save(rental);
-    }
-
-    private <T, D> ResponseEntity<T> executeRequest(
-            String url,
-            HttpMethod httpMethod,
-            D dto,
-            String token,
-            Class<T> responseType
-    ) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-        HttpEntity<D> request = new HttpEntity<>(dto, headers);
-
-        return restTemplate.exchange(url, httpMethod, request, responseType);
-    }
-
-    private RentalRequestDto createRentalRequest(Long carId, LocalDate start, LocalDate end) {
-        RentalRequestDto dto = new RentalRequestDto();
-        dto.setCarId(carId);
-        dto.setRentalDate(start);
-        dto.setReturnDate(end);
-        dto.setPickupLocationId(defaultPickupLocation.getId());
-        dto.setDropOffLocationId(defaultDropOffLocation.getId());
-        return dto;
-    }
-
-    private User createTestUser(String email, UserRole role) {
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode("password"));
-        user.setFirstName("Test");
-        user.setLastName("User");
-        user.setRole(role);
-        return userRepository.save(user);
-    }
-
-    private Rental createTestRental(LocalDate rentalDate, LocalDate returnDate) {
-        Rental rental = new Rental();
-        rental.setUser(defaultCustomer);
-        rental.setCar(defaultCar);
-        rental.setRentalDate(rentalDate);
-        rental.setReturnDate(returnDate);
-        rental.setPickupLocation(defaultPickupLocation);
-        rental.setDropOffLocation(defaultDropOffLocation);
-        rental.setStatus(RentalStatus.PAID);
-        return rental;
-    }
-
-    private Car createTestCar(String plate, CarStatus status, Location location) {
-        Car car = new Car();
-        car.setBrand("Toyota");
-        car.setModel("Camry");
-        car.setType(CarType.SEDAN);
-        car.setDailyFee(BigDecimal.TEN);
-        car.setLicensePlate(new LicensePlate(plate));
-        car.setColor("Black");
-        car.setStatus(status);
-        car.setDeleted(false);
-        car.setCurrentLocation(location);
-        car.setCarClass(CarClass.STANDARD);
-
-        CarSpecification spec = new CarSpecification();
-        spec.setTransmission(TransmissionType.AUTOMATIC);
-        spec.setFuelType(FuelType.PETROL);
-        spec.setSeatingCapacity(5);
-        spec.setDoorsQuantity(4);
-        spec.setBagQuantity(2);
-        spec.setHasAirConditioning(true);
-        car.setSpecification(spec);
-
-        return carRepository.save(car);
-    }
-
-    private String loginAndGetToken(String email) {
-        UserLoginRequestDto loginRequest = new UserLoginRequestDto();
-        loginRequest.setEmail(email);
-        loginRequest.setPassword("password");
-
-        ResponseEntity<JwtAuthenticationDto> response = restTemplate.postForEntity(
-                createUrl("/api/auth/login"),
-                loginRequest,
-                JwtAuthenticationDto.class
-        );
-        assertNotNull(response.getBody());
-        return response.getBody().getToken();
     }
 }

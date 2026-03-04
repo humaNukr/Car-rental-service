@@ -1,3 +1,4 @@
 package com.example.carrental.event;
 
-public record PaymentReceivedEvent(Long paymentId) {}
+public record PaymentReceivedEvent(Long paymentId) {
+}

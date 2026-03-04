@@ -32,12 +32,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class LocationServiceImplTest {
 
-    @Mock
-    private LocationRepository locationRepository;
-
     @Spy
     private final LocationMapper locationMapper = Mappers.getMapper(LocationMapper.class);
-
+    @Mock
+    private LocationRepository locationRepository;
     @InjectMocks
     private LocationServiceImpl locationService;
 
@@ -46,6 +44,31 @@ class LocationServiceImplTest {
     @BeforeEach
     void setUp() {
         testLocation = createTestLocation();
+    }
+
+    private Location createTestLocation() {
+        Location location = new Location();
+        location.setId(1L);
+        location.setCity("Kyiv");
+        location.setAddress("Khreshchatyk 1");
+        location.setWorkHours("09:00 - 18:00");
+        location.setEmail("kyiv@rental.com");
+        location.setPhones(List.of("+380991234567"));
+        location.setLatitude(new BigDecimal("50.4501"));
+        location.setLongitude(new BigDecimal("30.5234"));
+        return location;
+    }
+
+    private LocationRequestDto createLocationRequestDto() {
+        LocationRequestDto dto = new LocationRequestDto();
+        dto.setCity("Kyiv");
+        dto.setAddress("Khreshchatyk 1");
+        dto.setWorkHours("09:00 - 18:00");
+        dto.setEmail("kyiv@rental.com");
+        dto.setPhones(List.of("+380991234567"));
+        dto.setLatitude(new BigDecimal("50.4501"));
+        dto.setLongitude(new BigDecimal("30.5234"));
+        return dto;
     }
 
     @Nested
@@ -133,31 +156,5 @@ class LocationServiceImplTest {
                     .hasMessageContaining("Location not found");
             verify(locationRepository, never()).delete(any());
         }
-    }
-
-
-    private Location createTestLocation() {
-        Location location = new Location();
-        location.setId(1L);
-        location.setCity("Kyiv");
-        location.setAddress("Khreshchatyk 1");
-        location.setWorkHours("09:00 - 18:00");
-        location.setEmail("kyiv@rental.com");
-        location.setPhones(List.of("+380991234567"));
-        location.setLatitude(new BigDecimal("50.4501"));
-        location.setLongitude(new BigDecimal("30.5234"));
-        return location;
-    }
-
-    private LocationRequestDto createLocationRequestDto() {
-        LocationRequestDto dto = new LocationRequestDto();
-        dto.setCity("Kyiv");
-        dto.setAddress("Khreshchatyk 1");
-        dto.setWorkHours("09:00 - 18:00");
-        dto.setEmail("kyiv@rental.com");
-        dto.setPhones(List.of("+380991234567"));
-        dto.setLatitude(new BigDecimal("50.4501"));
-        dto.setLongitude(new BigDecimal("30.5234"));
-        return dto;
     }
 }

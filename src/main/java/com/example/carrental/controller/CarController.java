@@ -6,7 +6,6 @@ import com.example.carrental.dto.car.CarRequestDto;
 import com.example.carrental.dto.car.CarResponseDto;
 import com.example.carrental.dto.car.CarSearchParameters;
 import com.example.carrental.dto.car.CarUpdateRequestDto;
-import com.example.carrental.mapper.car.CarMapper;
 import com.example.carrental.service.impl.CarImageService;
 import com.example.carrental.service.interfaces.CarService;
 import jakarta.validation.Valid;
@@ -68,7 +67,6 @@ public class CarController {
         carService.delete(id);
     }
 
-
     @GetMapping("/{id}/images")
     public CarImagesDto getCarImages(@PathVariable Long id) {
         List<String> imageUrls = imageService.getImagesPaths(id);
@@ -106,6 +104,5 @@ public class CarController {
         carService.deleteImages(id, imageUrls);
         return ResponseEntity.ok().build();
     }
-
 
 }

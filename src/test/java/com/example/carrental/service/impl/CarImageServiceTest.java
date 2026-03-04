@@ -1,10 +1,10 @@
 package com.example.carrental.service.impl;
 
-import com.example.carrental.properties.FileProperties;
 import com.example.carrental.entity.Car;
 import com.example.carrental.entity.CarImage;
 import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.exception.file.FileStorageException;
+import com.example.carrental.properties.FileProperties;
 import com.example.carrental.repository.CarImageRepository;
 import com.example.carrental.repository.CarRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +35,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CarImageServiceTest {
 
+    @TempDir
+    Path tempDir;
     @Mock
     private FileProperties fileProperties;
     @Mock
@@ -43,11 +45,7 @@ class CarImageServiceTest {
     private CarImageRepository carImageRepository;
     @Mock
     private FileProperties.Subdirs subdirs;
-
     private CarImageService service;
-
-    @TempDir
-    Path tempDir;
 
     @BeforeEach
     void setUp() {
@@ -214,12 +212,11 @@ class CarImageServiceTest {
         @DisplayName("Success: Should delete physical file and remove from Entity list")
         void shouldDeleteFileAndEntity() throws IOException {
             Long carId = 1L;
-            String imageUrl = "/images/cars/car-1/delete_me.jpg";
-
             Car car = new Car();
             car.setId(carId);
             car.setImages(new ArrayList<>());
 
+            String imageUrl = "/images/cars/car-1/delete_me.jpg";
             CarImage carImage = new CarImage();
             carImage.setId(100L);
             carImage.setImageUrl(imageUrl);
@@ -258,15 +255,17 @@ class CarImageServiceTest {
         @Test
         @DisplayName("Fail: Should throw if Image Entity not found")
         void shouldThrowIfImageEntityNotFound() throws IOException {
-            Long carId = 1L;
             String imageUrl = "/images/cars/car-1/ghost.jpg";
-            Car car = new Car();
 
             lenient().when(fileProperties.getBaseDir()).thenReturn(tempDir.toString());
             String relativePath = imageUrl.substring(1);
             Path filePath = tempDir.resolve(relativePath);
             Files.createDirectories(filePath.getParent());
             Files.createFile(filePath);
+
+
+            Car car = new Car();
+            Long carId = 1L;
 
             when(carRepository.findById(carId)).thenReturn(Optional.of(car));
             when(carImageRepository.findByImageUrl(imageUrl)).thenReturn(Optional.empty());

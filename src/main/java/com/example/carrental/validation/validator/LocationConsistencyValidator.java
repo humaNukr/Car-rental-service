@@ -5,7 +5,8 @@ import com.example.carrental.validation.annotation.LocationConsistency;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class LocationConsistencyValidator implements ConstraintValidator<LocationConsistency, LocationUpdateRequestDto> {
+public class LocationConsistencyValidator implements
+        ConstraintValidator<LocationConsistency, LocationUpdateRequestDto> {
 
     @Override
     public boolean isValid(LocationUpdateRequestDto dto, ConstraintValidatorContext context) {

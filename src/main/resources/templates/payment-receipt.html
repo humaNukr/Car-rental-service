@@ -4,27 +4,142 @@
     <meta charset="UTF-8">
     <title>Квитанція про оплату</title>
     <style>
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f3f4f6; margin: 0; padding: 40px 0; -webkit-font-smoothing: antialiased; }
-        .wrapper { width: 100%; table-layout: fixed; background-color: #f3f4f6; padding-bottom: 40px; }
-        .main-content { background-color: #ffffff; max-width: 600px; margin: 0 auto; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); }
-        .header { background-color: #111827; color: #ffffff; padding: 40px 30px; text-align: center; }
-        .header h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 0.5px; }
-        .header p { margin: 10px 0 0 0; color: #9ca3af; font-size: 15px; }
-        .body-content { padding: 40px 30px; color: #374151; }
-        .greeting { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #111827; }
-        .info-text { font-size: 16px; line-height: 1.6; margin-bottom: 30px; color: #4b5563; }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 40px 0;
+            -webkit-font-smoothing: antialiased;
+        }
 
-        .receipt-card { background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 25px; margin-bottom: 30px; }
-        .receipt-row { display: table; width: 100%; margin-bottom: 15px; }
-        .receipt-row:last-child { margin-bottom: 0; border-top: 1px solid #e5e7eb; padding-top: 15px; margin-top: 15px; }
-        .label { display: table-cell; font-size: 14px; color: #6b7280; font-weight: 500; width: 45%; }
-        .value { display: table-cell; font-size: 15px; color: #111827; font-weight: 600; text-align: right; }
-        .total-value { display: table-cell; font-size: 22px; color: #10b981; font-weight: 700; text-align: right; }
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #f3f4f6;
+            padding-bottom: 40px;
+        }
 
-        .btn-container { text-align: center; margin: 40px 0 20px 0; }
-        .btn { background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; }
-        .footer { background-color: #f9fafb; padding: 25px 30px; text-align: center; border-top: 1px solid #f3f4f6; }
-        .footer p { margin: 0; font-size: 13px; color: #9ca3af; }
+        .main-content {
+            background-color: #ffffff;
+            max-width: 600px;
+            margin: 0 auto;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            background-color: #111827;
+            color: #ffffff;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            color: #9ca3af;
+            font-size: 15px;
+        }
+
+        .body-content {
+            padding: 40px 30px;
+            color: #374151;
+        }
+
+        .greeting {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #111827;
+        }
+
+        .info-text {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #4b5563;
+        }
+
+        .receipt-card {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .receipt-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .receipt-row:last-child {
+            margin-bottom: 0;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .label {
+            display: table-cell;
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+            width: 45%;
+        }
+
+        .value {
+            display: table-cell;
+            font-size: 15px;
+            color: #111827;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .total-value {
+            display: table-cell;
+            font-size: 22px;
+            color: #10b981;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin: 40px 0 20px 0;
+        }
+
+        .btn {
+            background-color: #2563eb;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            display: inline-block;
+        }
+
+        .footer {
+            background-color: #f9fafb;
+            padding: 25px 30px;
+            text-align: center;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 13px;
+            color: #9ca3af;
+        }
     </style>
 </head>
 <body>
@@ -38,7 +153,8 @@
         <div class="body-content">
             <div class="greeting">Привіт, <span th:text="${name}">Клієнт</span>!</div>
             <div class="info-text">
-                Дякуємо, що обрали наш сервіс. Ми успішно отримали вашу оплату. Ваша автівка вже чекає на вас у вказані дати!
+                Дякуємо, що обрали наш сервіс. Ми успішно отримали вашу оплату. Ваша автівка вже чекає на вас у вказані
+                дати!
             </div>
 
             <div class="receipt-card">
@@ -65,7 +181,7 @@
             </div>
 
             <div class="btn-container">
-                <a th:href="${rentalDetailsUrl}" class="btn">Деталі бронювання</a>
+                <a class="btn" th:href="${rentalDetailsUrl}">Деталі бронювання</a>
             </div>
         </div>
 

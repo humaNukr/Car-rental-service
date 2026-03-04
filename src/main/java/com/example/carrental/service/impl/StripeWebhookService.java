@@ -36,7 +36,7 @@ public class StripeWebhookService {
             if (dataObjectDeserializer.getObject().isPresent()) {
                 Session session = (Session) dataObjectDeserializer.getObject().get();
                 log.info("Webhook received: checkout.session.completed for session {}", session.getId());
-                
+
                 paymentService.handlePaymentSuccess(session.getId());
             }
         }

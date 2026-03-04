@@ -22,7 +22,9 @@ public record LicensePlate(
     }
 
     public static boolean isValid(String value) {
-        if (value == null) return false;
+        if (value == null) {
+            return false;
+        }
         String sanitized = value.trim().toUpperCase();
 
         return PATTERNS.stream().anyMatch(p -> p.matcher(sanitized).matches());

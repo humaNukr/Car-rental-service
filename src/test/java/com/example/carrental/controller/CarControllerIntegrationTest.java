@@ -1,9 +1,9 @@
 package com.example.carrental.controller;
 
+import com.example.carrental.domain.CarSpecification;
 import com.example.carrental.domain.LicensePlate;
 import com.example.carrental.dto.car.CarResponseDto;
 import com.example.carrental.entity.Car;
-import com.example.carrental.domain.CarSpecification;
 import com.example.carrental.entity.Location;
 import com.example.carrental.enums.car.CarClass;
 import com.example.carrental.enums.car.CarStatus;
@@ -124,7 +124,8 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             String url = createUrl("/api/cars?brands=BMW");
 
             ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
-                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+                    }
             );
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -141,7 +142,8 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             String url = createUrl("/api/cars?types=SUV,SEDAN");
 
             ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
-                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+                    }
             );
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -157,7 +159,8 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             String url = createUrl("/api/cars?minDailyFee=40&maxDailyFee=100");
 
             ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
-                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+                    }
             );
 
             List<CarResponseDto> cars = response.getBody();
@@ -176,7 +179,8 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             String url = createUrl("/api/cars?brands=BMW&colors=Black");
 
             ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
-                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+                    }
             );
 
             List<CarResponseDto> cars = response.getBody();
@@ -192,7 +196,8 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             String url = createUrl("/api/cars?carClasses=PREMIUM,STANDARD");
 
             ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
-                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+                    }
             );
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -208,7 +213,8 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             String url = createUrl("/api/cars?transmissions=MANUAL");
 
             ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
-                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+                    }
             );
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -226,7 +232,8 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             String url = createUrl("/api/cars?fuelTypes=DIESEL");
 
             ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
-                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+                    }
             );
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -242,7 +249,8 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             String url = createUrl("/api/cars?hasAirConditioning=false");
 
             ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
-                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+                    }
             );
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -259,7 +267,8 @@ class CarControllerIntegrationTest extends BaseIntegrationTest {
             String url = createUrl("/api/cars?brands=BMW&transmissions=MANUAL");
 
             ResponseEntity<List<CarResponseDto>> response = restTemplate.exchange(
-                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}
+                    url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+                    }
             );
 
             assertEquals(HttpStatus.OK, response.getStatusCode());

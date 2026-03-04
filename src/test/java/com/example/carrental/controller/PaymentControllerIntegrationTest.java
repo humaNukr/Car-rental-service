@@ -115,13 +115,13 @@ public class PaymentControllerIntegrationTest {
         @WithMockUser(username = "manager", roles = "MANAGER")
         @SneakyThrows
         void shouldCreateFineWhenManager() {
-            Long rentalId = 1L;
-            CreateFineDto fineDto = new CreateFineDto(BigDecimal.valueOf(50.00), "DAMAGE");
-
             PaymentResponseDto mockResponse = new PaymentResponseDto();
             mockResponse.setStatus(PaymentStatus.PENDING);
             mockResponse.setType(PaymentType.FINE);
             mockResponse.setAmount(BigDecimal.valueOf(50.00));
+
+            Long rentalId = 1L;
+            CreateFineDto fineDto = new CreateFineDto(BigDecimal.valueOf(50.00), "DAMAGE");
 
             when(paymentService.createFine(eq(rentalId), any(CreateFineDto.class)))
                     .thenReturn(mockResponse);

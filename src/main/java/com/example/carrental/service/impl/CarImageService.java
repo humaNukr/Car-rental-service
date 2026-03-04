@@ -1,10 +1,10 @@
 package com.example.carrental.service.impl;
 
-import com.example.carrental.properties.FileProperties;
 import com.example.carrental.entity.Car;
 import com.example.carrental.entity.CarImage;
 import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.exception.file.FileStorageException;
+import com.example.carrental.properties.FileProperties;
 import com.example.carrental.repository.CarImageRepository;
 import com.example.carrental.repository.CarRepository;
 import com.example.carrental.service.abstracts.ImageService;
@@ -74,8 +74,12 @@ public class CarImageService extends ImageService {
 
         return diskPaths.stream()
                 .sorted((url1, url2) -> {
-                    if (url1.equals(mainImageUrl)) return -1;
-                    if (url2.equals(mainImageUrl)) return 1;
+                    if (url1.equals(mainImageUrl)) {
+                        return -1;
+                    }
+                    if (url2.equals(mainImageUrl)) {
+                        return 1;
+                    }
                     return url1.compareTo(url2);
                 })
                 .toList();

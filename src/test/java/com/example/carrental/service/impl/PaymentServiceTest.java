@@ -11,7 +11,6 @@ import com.example.carrental.entity.User;
 import com.example.carrental.enums.payment.PaymentStatus;
 import com.example.carrental.enums.payment.PaymentType;
 import com.example.carrental.enums.user.UserRole;
-import com.example.carrental.exception.base.EntityNotFoundException;
 import com.example.carrental.mapper.payment.PaymentMapper;
 import com.example.carrental.repository.PaymentRepository;
 import com.example.carrental.repository.RentalRepository;

@@ -27,6 +27,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
@@ -42,7 +43,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -88,6 +88,17 @@ class CarServiceImplTest {
         defaultCar.setDailyFee(BigDecimal.valueOf(100));
         defaultCar.setStatus(CarStatus.AVAILABLE);
         defaultCar.setCurrentLocation(defaultLocation);
+    }
+
+    private CarRequestDto createCarRequestDto() {
+        CarRequestDto dto = new CarRequestDto();
+        dto.setBrand("BMW");
+        dto.setModel("X5");
+        dto.setType(CarType.SUV);
+        dto.setLicensePlate("AA0000AA");
+        dto.setDailyFee(BigDecimal.valueOf(100));
+        dto.setColor("Black");
+        return dto;
     }
 
     @Nested
@@ -150,9 +161,14 @@ class CarServiceImplTest {
         @Test
         @DisplayName("Should build spec and return mapped list")
         void shouldReturnMappedList() {
-            CarSearchParameters params = new CarSearchParameters(null, null, null, null, null, null, null, null, null, null, null, null, null);
+            CarSearchParameters params = new CarSearchParameters(
+                    null, null, null, null,
+                    null, null, null, null,
+                    null, null, null, null,
+                    null);
             PageRequest pageable = PageRequest.of(0, 10);
-            Specification<Car> spec = mock(Specification.class);
+            @SuppressWarnings("unchecked")
+            Specification<Car> spec = (Specification<Car>) Mockito.mock(Specification.class);
             Page<Car> carPage = new PageImpl<>(List.of(defaultCar));
 
             when(carSpecificationBuilder.build(params)).thenReturn(spec);
@@ -161,7 +177,7 @@ class CarServiceImplTest {
             List<CarResponseDto> result = carService.getAll(params, pageable);
 
             assertThat(result).hasSize(1);
-            assertThat(result.get(0).getBrand()).isEqualTo("BMW");
+            assertThat(result.getFirst().getBrand()).isEqualTo("BMW");
         }
     }
 
@@ -258,16 +274,5 @@ class CarServiceImplTest {
                     .isInstanceOf(EntityNotFoundException.class);
             verify(carImageService, never()).uploadImages(any(), any());
         }
-    }
-
-    private CarRequestDto createCarRequestDto() {
-        CarRequestDto dto = new CarRequestDto();
-        dto.setBrand("BMW");
-        dto.setModel("X5");
-        dto.setType(CarType.SUV);
-        dto.setLicensePlate("AA0000AA");
-        dto.setDailyFee(BigDecimal.valueOf(100));
-        dto.setColor("Black");
-        return dto;
     }
 }

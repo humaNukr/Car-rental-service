@@ -4,7 +4,6 @@ import com.example.carrental.validation.annotation.ValidRentalPeriod;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.time.LocalDate;

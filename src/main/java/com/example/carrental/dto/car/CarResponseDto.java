@@ -3,8 +3,6 @@ package com.example.carrental.dto.car;
 import com.example.carrental.enums.car.CarClass;
 import com.example.carrental.enums.car.CarStatus;
 import com.example.carrental.enums.car.CarType;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;

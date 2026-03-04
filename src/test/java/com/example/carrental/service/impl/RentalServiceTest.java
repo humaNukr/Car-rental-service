@@ -1,9 +1,9 @@
 package com.example.carrental.service.impl;
 
+import com.example.carrental.domain.CarSpecification;
 import com.example.carrental.dto.rental.RentalRequestDto;
 import com.example.carrental.dto.rental.RentalResponseDto;
 import com.example.carrental.entity.Car;
-import com.example.carrental.domain.CarSpecification;
 import com.example.carrental.entity.Location;
 import com.example.carrental.entity.Rental;
 import com.example.carrental.entity.User;

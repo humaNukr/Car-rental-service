@@ -37,7 +37,6 @@ class RentalEventListenerTest {
     @DisplayName("Success: Should cancel rental and free the car when Payment expires")
     void shouldCancelRentalAndFreeCar() {
         Long rentalId = 1L;
-        PaymentExpiredEvent event = new PaymentExpiredEvent(rentalId);
 
         Car car = new Car();
         car.setId(10L);
@@ -49,6 +48,8 @@ class RentalEventListenerTest {
         rental.setCar(car);
 
         when(rentalRepository.findById(rentalId)).thenReturn(Optional.of(rental));
+
+        PaymentExpiredEvent event = new PaymentExpiredEvent(rentalId);
 
         rentalEventListener.handlePaymentExpired(event);
 

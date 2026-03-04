@@ -142,7 +142,6 @@ public class CarServiceImpl implements CarService {
                 .orElseThrow(() -> new EntityNotFoundException("Car not found with id: " + id));
     }
 
-
     private void checkForPlatesConflict(LicensePlate licensePlate) {
         if (carRepository.existsByLicensePlate(licensePlate)) {
             throw new LicensePlateAlreadyExistsException("Car with this license plate already exists");
